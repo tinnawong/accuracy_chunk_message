@@ -1,0 +1,14 @@
+{
+    "Start": 1600250669.3160443,
+    "endTime": 1600250669.3708956,
+    "duration": 0.05485129356384277,
+    "substitution": 1,
+    "deletion": 2,
+    "insertion": 0,
+    "correct": 16,
+    "WER": 15.789473684210526,
+    "threshold": 10,
+    "chunkSize": 1000,
+    "PID": 15616,
+    "memeryUse": 28258304
+}

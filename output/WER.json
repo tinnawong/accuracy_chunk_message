@@ -1,0 +1,12 @@
+{
+    "Start": 1600250720.0772576,
+    "endTime": 1600250720.0891929,
+    "duration": 0.011935234069824219,
+    "substitution": 1,
+    "deletion": 2,
+    "insertion": 0,
+    "correct": 16,
+    "WER": 15.789473684210526,
+    "PID": 8352,
+    "memeryUse": 28143616
+}
