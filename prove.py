@@ -316,26 +316,19 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
     return resultDict
 
 
-def testRun(chunkSize):
-    r = "เราไปทำงานที่นี่น้า"
-    h = "เรไปทงานที่นี่น้ะ"
+def testRun(r,h,chunkSize,threshold):
+    # r = "เราไปทำงานที่นี่น้า"
+    # h = "เรไปทงานที่นี่น้ะ"
 
-    threshold = 10
+    # threshold = 10
     # chunkSize = 500
     maxLength = 20000
 
-    rPath = "C:/Users\Admin\Desktop\เทียบเฉลย\correct/test2.txt"
-    hPath = "C:/Users\Admin\Desktop\เทียบเฉลย/raw/test2.txt"
-
-    with codecs.open(rPath, 'r', encoding="utf-8") as file:
-        r = file.read().replace(" ", "").lower()
-    with codecs.open(hPath, 'r', encoding="utf-8") as file:
-        h = file.read().replace(" ", "").lower()
-
+    process = psutil.Process(os.getpid())
     startTime = time.time()
     measureByWER(r, h, threshold, chunkSize, maxLength)
     endTime = time.time()
-    return endTime-startTime
+    return [endTime-startTime,process.memory_info().rss*0.000001]
     # print("WER : ", data['WER'])
     # # print("length r :",len(r)-1,"\nlength h :",len(h)-1)
 
@@ -372,18 +365,49 @@ if __name__ == "__main__":
     import psutil
     import time
     import json
+    import psutil
     # 0 substitution
     # 1 deletion
     # 2 insertion
     # 3 correct
-    size = [20,30,40,50]
-    timeUsed = []
-    for i in size:
-        usetime = testRun(i)
-        timeUsed.append(usetime)
-        print(">>> size {} >> {}".format(i,usetime))
-        time.sleep(5)
-    print(timeUsed)
+    r = "เราไปทำงานที่นี่น้า"
+    h = "เรไปทงานที่นี่น้ะ"
+    rPath = ["C:/Users\Admin\Desktop\เทียบเฉลย/correct/test.txt",
+    "C:/Users\Admin\Desktop\เทียบเฉลย/correct/3922_310863_หลักการเขียนโปรแกรม (ปี1).txt",
+    "C:/Users\Admin\Desktop\เทียบเฉลย/correct/3889_100863_หัวข้อพิเศษด้านเทคโนโลยีสารสนเทศ (ปี3).txt"]
 
-    with codecs.open("./output/time use2.txt", 'w', encoding="utf-8") as file:
-        file.write(str(timeUsed))
+    hPath = ["C:/Users\Admin\Desktop\เทียบเฉลย/raw/test.txt",
+    "C:/Users\Admin\Desktop\เทียบเฉลย/raw/3922.txt",
+    "C:/Users\Admin\Desktop\เทียบเฉลย/raw/3889.txt"]
+
+    threshold = 10
+    size = range(40,51,2)
+    print(">>> size :",size)
+    timeUsed = []
+    dataWrite = []
+    for j,path in enumerate(rPath):
+        for i,chunkSize in enumerate(size):
+
+
+            with codecs.open(rPath[j], 'r', encoding="utf-8") as file:
+                r = file.read().replace(" ", "").lower()
+            with codecs.open(hPath[j], 'r', encoding="utf-8") as file:
+                h = file.read().replace(" ", "").lower()
+
+            dataTest = testRun(r,h,chunkSize,threshold)
+            dataWrite.append((chunkSize,threshold,dataTest[0],dataTest[1]))
+            print(">>> size {} >> {}".format(chunkSize,dataTest))
+            time.sleep(2)
+
+
+        textWrite = ""
+        for data in dataWrite:
+            textWrite += str(len(r)) + "\t" +\
+            str(len(h)) + "\t" +\
+            str(data[0]) + "\t"+\
+            str(data[1]) + "\t" +\
+                str(data[2]) + "\t"+\
+                str(data[3]) + "\n"
+
+        with codecs.open("./output/show log[{}].txt".format(j), 'w', encoding="utf-8") as file:
+            file.write(str(textWrite))
