@@ -282,6 +282,7 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
             else:
                 # If large jump (large upChunkSize) may to condition memoryOverload
                 upChunkSize += 200
+                continue
                 # print(">>> up chunk size to %s" % upChunkSize)
 
         # threshold ok
@@ -372,20 +373,23 @@ if __name__ == "__main__":
     # 3 correct
     r = "เราไปทำงานที่นี่น้า"
     h = "เรไปทงานที่นี่น้ะ"
-    rPath = ["C:/Users\Admin\Desktop\เทียบเฉลย/correct/test.txt",
-    "C:/Users\Admin\Desktop\เทียบเฉลย/correct/3922_310863_หลักการเขียนโปรแกรม (ปี1).txt",
-    "C:/Users\Admin\Desktop\เทียบเฉลย/correct/3889_100863_หัวข้อพิเศษด้านเทคโนโลยีสารสนเทศ (ปี3).txt"]
+    rPath = [
+        # "G:/correct/test.txt",
+    "G:/correct/3922_310863_หลักการเขียนโปรแกรม (ปี1).txt",
+    "G:/correct/3889_100863_หัวข้อพิเศษด้านเทคโนโลยีสารสนเทศ (ปี3).txt"]
 
-    hPath = ["C:/Users\Admin\Desktop\เทียบเฉลย/raw/test.txt",
-    "C:/Users\Admin\Desktop\เทียบเฉลย/raw/3922.txt",
-    "C:/Users\Admin\Desktop\เทียบเฉลย/raw/3889.txt"]
+    hPath = [
+        # "G:/raw/test.txt",
+    "G:/raw/3922.txt",
+    "G:/raw/3889.txt"]
 
     threshold = 10
-    size = range(40,51,2)
+    size = range(10,51,4)
     print(">>> size :",size)
-    timeUsed = []
-    dataWrite = []
+    
+    
     for j,path in enumerate(rPath):
+        dataWrite = []
         for i,chunkSize in enumerate(size):
 
 
@@ -397,12 +401,13 @@ if __name__ == "__main__":
             dataTest = testRun(r,h,chunkSize,threshold)
             dataWrite.append((chunkSize,threshold,dataTest[0],dataTest[1]))
             print(">>> size {} >> {}".format(chunkSize,dataTest))
-            time.sleep(2)
+            time.sleep(1)
 
 
         textWrite = ""
         for data in dataWrite:
-            textWrite += str(len(r)) + "\t" +\
+            textWrite += os.path.split(rPath[j])[1]+"\t"+\
+            str(len(r)) + "\t" +\
             str(len(h)) + "\t" +\
             str(data[0]) + "\t"+\
             str(data[1]) + "\t" +\
