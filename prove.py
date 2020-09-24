@@ -188,6 +188,10 @@ def WER(r, h):
 
 
 def writeHtml(resultDict):
+    # resultDict = {"WER": result*100, "substitution": substitution,
+    #  "memoryOverload": memoryOverload,
+    #  "deletion": deletion, "insertion": insertion, "correct": correct,
+    #  "textList": textList, "textTag": textTag}
     html = """
     <!DOCTYPE html>
     <html>
@@ -196,21 +200,20 @@ def writeHtml(resultDict):
         <title>Page Title</title>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
         <style>
-            .substitution {
-                color: rgb(0, 199, 27);
-            }
+        .substitution {
+            background-color: #ffa50099;
+        }
 
-            .deletion {
-                color: crimson;
-            }
+        .deletion {
+            background-color: #ff00004d;
+        }
 
-            .insertion {
-                color: darkblue;
-            }
+        .insertion {
+            background-color: #0080004d;
+        }
 
-            .correct {
-                color: rgb(0, 0, 0);
-            }
+        .correct {
+        }
         </style>
     </head>
     <body>
@@ -221,13 +224,22 @@ def writeHtml(resultDict):
         2: "insertion",
         3: "correct"
     }
-    html += '<span class="substitution">substitution</span> <span class="deletion">deletion</span> <span class="insertion">insertion</span> <span class="correct">correct</span><br> '
+
+    html += """
+    <div >Accuracy : {}</div> 
+    <div class="substitution">Substitution : {}</div> 
+    <div class="deletion">Deletion : {}</div>
+    <div class="insertion">Insertion : {}</div> 
+    <div class="correct">Correct : {}</div>
+    <div>Total : {}</div><br>  """.format(100-resultDict["WER"],resultDict["substitution"],resultDict["deletion"],resultDict["insertion"],
+    resultDict["correct"],0)
+
     for listTage in resultDict["textTag"]:
         if(listTage[0] != 0 and listTage[0] != 1):
             html += "<span class='{}'>{}</span>".format(
                 dictTage[listTage[0]], listTage[1])
         elif(listTage[0] == 1):
-            html += "<span class='{}'>( {})</span>".format(
+            html += "<span class='{}'>{}</span>".format(
                 dictTage[listTage[0]], listTage[1])
         else:
             html += "<span class='{0}'>{2}({1})</span>".format(
@@ -237,7 +249,10 @@ def writeHtml(resultDict):
     </body>
     </html>
     """
-    with codecs.open("output/result.html", 'w', encoding="utf-8") as file:
+    for i in range(500):
+        if(not os.path.isfile("output/result[{}].html".format(i))):
+            break
+    with codecs.open("output/result[{}].html".format(i), 'w', encoding="utf-8") as file:
         file.write(html)
 
 
@@ -374,25 +389,28 @@ if __name__ == "__main__":
     r = "เราไปทำงานที่นี่น้า"
     h = "เรไปทงานที่นี่น้ะ"
     rPath = [
-        # "G:/correct/test.txt",
-    "G:/correct/3922_310863_หลักการเขียนโปรแกรม (ปี1).txt",
-    "G:/correct/3889_100863_หัวข้อพิเศษด้านเทคโนโลยีสารสนเทศ (ปี3).txt"]
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/10kb 3911_240863 พาณิชย์อิเล็กทรอนิกส์ (ปี 3).txt",
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/25kb 3889_100863_หัวข้อพิเศษด้านเทคโนโลยีสารสนเทศ (ปี3).txt",
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/50kb 3922_310863_หลักการเขียนโปรแกรม (ปี1) test.txt",
+        "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/60kb 3874_030863_หลักการเขียนโปรแกรม (ปี1) - test.txt"
 
+    ]
     hPath = [
-        # "G:/raw/test.txt",
-    "G:/raw/3922.txt",
-    "G:/raw/3889.txt"]
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/10kb 3911 test.txt",
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/25kb 3889 test.txt",
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/50kb 3922 test.txt",
+        "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/60kb 3874 - Copy.txt"
+    ]
 
     threshold = 10
-    size = range(10,51,4)
+    # size = range(50,51,6)
+    size= [1000]
     print(">>> size :",size)
     
     
     for j,path in enumerate(rPath):
         dataWrite = []
         for i,chunkSize in enumerate(size):
-
-
             with codecs.open(rPath[j], 'r', encoding="utf-8") as file:
                 r = file.read().replace(" ", "").lower()
             with codecs.open(hPath[j], 'r', encoding="utf-8") as file:
