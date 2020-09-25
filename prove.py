@@ -139,11 +139,11 @@ def WER(r, h):
 
     x = len(r)
     y = len(h)
-    substitution = 0
-    deletion = 0
-    insertion = 0
-    correct = 0
-    textTag = []
+    substitution = 0 # 0
+    deletion = 0    # 1
+    insertion = 0   # 2
+    correct = 0     # 3
+    textTag = []    
     while True:
         if x == 0 and y == 0:
             break
@@ -186,18 +186,16 @@ def WER(r, h):
         substitution, deletion, insertion, correct), "textTag": textTag}
     return dataReturn
 
-
-def writeHtml(resultDict):
+def writeHtml(resultDict,fileName):
     # resultDict = {"WER": result*100, "substitution": substitution,
     #  "memoryOverload": memoryOverload,
     #  "deletion": deletion, "insertion": insertion, "correct": correct,
-    #  "textList": textList, "textTag": textTag}
     html = """
     <!DOCTYPE html>
     <html>
         <head>
         <meta charset='utf-8'>
-        <title>Page Title</title>
+        <title>%s</title>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
         <style>
         .substitution {
@@ -216,8 +214,8 @@ def writeHtml(resultDict):
         }
         </style>
     </head>
-    <body>
-    """
+    <body>"""%fileName
+
     dictTage = {
         0: "substitution",
         1: "deletion",
@@ -249,10 +247,10 @@ def writeHtml(resultDict):
     </body>
     </html>
     """
-    for i in range(500):
-        if(not os.path.isfile("output/result[{}].html".format(i))):
+    for i in range(1,501,1):
+        if(not os.path.isfile("output/{}[{}].html".format(fileName,i))):
             break
-    with codecs.open("output/result[{}].html".format(i), 'w', encoding="utf-8") as file:
+    with codecs.open("output/{}[{}].html".format(fileName,i), 'w', encoding="utf-8") as file:
         file.write(html)
 
 
@@ -261,7 +259,7 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
     # for string format [:num +1] because getChunk return index(index start with 0)
     indexReference = 0
     indexHypothesis = 0
-    textList = []
+    chunkList = []
     substitution = 0
     deletion = 0
     insertion = 0
@@ -291,7 +289,7 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
                 werData = WER(r[indexReference:], h[indexHypothesis:])
                 indexReference += len(r[indexReference:])-1
                 indexHypothesis += len(h[indexHypothesis:])-1
-                textList.append(
+                chunkList.append(
                     (r[indexReference:], h[indexHypothesis:], werData["abstract"]))
                 isFinal = True
             else:
@@ -305,7 +303,7 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
             upChunkSize = 0
             werData = WER(r[indexReference:indexReference+lastIndex[0]+1],
                           h[indexHypothesis:indexHypothesis+lastIndex[1]+1])
-            textList.append((r[indexReference:indexReference+lastIndex[0]+1],
+            chunkList.append((r[indexReference:indexReference+lastIndex[0]+1],
                              h[indexHypothesis:indexHypothesis+lastIndex[1]+1], werData["abstract"]))
             # sum 1 because next char
             indexReference += lastIndex[0]+1
@@ -321,18 +319,15 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
         if((indexReference > (len(r)-1) and indexHypothesis > (len(h)-1)) or isFinal):
             break
 
-    # print(">>> text list :", textList)
-    # print(">>> text tag :", textTag)
     print("\n\n>>>", substitution, deletion, insertion, correct)
     result = float((substitution+deletion+insertion)/len(r))
-    resultDict = {"WER": result*100, "substitution": substitution, "memoryOverload": memoryOverload,
+    resultDict = {"memoryOverload": memoryOverload,"WER": result*100, "substitution": substitution, 
                   "deletion": deletion, "insertion": insertion, "correct": correct,
-                  "textList": textList, "textTag": textTag}
-    writeHtml(resultDict)
+                  "chunkList": chunkList, "textTag": textTag}
     return resultDict
 
 
-def testRun(r,h,chunkSize,threshold):
+def testRun(r,h,chunkSize,threshold,fileName):
     # r = "เราไปทำงานที่นี่น้า"
     # h = "เรไปทงานที่นี่น้ะ"
 
@@ -342,36 +337,33 @@ def testRun(r,h,chunkSize,threshold):
 
     process = psutil.Process(os.getpid())
     startTime = time.time()
-    measureByWER(r, h, threshold, chunkSize, maxLength)
+    resultDict = measureByWER(r, h, threshold, chunkSize, maxLength)
     endTime = time.time()
-    return [endTime-startTime,process.memory_info().rss*0.000001]
-    # print("WER : ", data['WER'])
-    # # print("length r :",len(r)-1,"\nlength h :",len(h)-1)
-
-    # process = psutil.Process(os.getpid())
-    # memeryUse = process.memory_info().rss
-    # provText = {
-    #     "pathFileNameRef": rPath,
-    #     "pathFileNameHyp": hPath,
-    #     "memoryOverload": data["memoryOverload"],
-    #     "Start": startTime,
-    #     "endTime": endTime,
-    #     "duration": endTime-startTime,
-    #     "totalCorrect":len(r),
-    #     "totalRaw":len(h),
-    #     "substitution": data["substitution"],
-    #     "deletion": data["deletion"],
-    #     "insertion": data["insertion"],
-    #     "correct": data["correct"],
-    #     "WER": data["WER"],
-    #     "accuracy":100 - data["WER"],
-    #     "maxLength": maxLength,
-    #     "threshold": threshold,
-    #     "chunkSize": chunkSize,
-    #     "PID": os.getpid(),
-    #     "memeryUse": memeryUse,
-    #     "textList": data["textList"]
-    # }
+    writeHtml(resultDict,fileName)
+    memeryUse = process.memory_info().rss*0.000001
+    provText = {
+        "pathFileNameRef": rPath,
+        "pathFileNameHyp": hPath,
+        "memoryOverload": resultDict["memoryOverload"],
+        "Start": startTime,
+        "endTime": endTime,
+        "duration": endTime-startTime,
+        "totalCorrect":len(r),
+        "totalRaw":len(h),
+        "substitution": resultDict["substitution"],
+        "deletion": resultDict["deletion"],
+        "insertion": resultDict["insertion"],
+        "correct": resultDict["correct"],
+        "WER": resultDict["WER"],
+        "accuracy":100 - resultDict["WER"],
+        "maxLength": maxLength,
+        "threshold": threshold,
+        "chunkSize": chunkSize,
+        "PID": os.getpid(),
+        "memeryUse": memeryUse,
+        "chunkList": resultDict["chunkList"]
+    }
+    return provText
     # with codecs.open("./output/output_prove.json", 'w', encoding="utf-8") as file:
     #     file.write(str(json.dumps(provText, indent=4)))
 
@@ -390,47 +382,35 @@ if __name__ == "__main__":
     h = "เรไปทงานที่นี่น้ะ"
     rPath = [
         # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/10kb 3911_240863 พาณิชย์อิเล็กทรอนิกส์ (ปี 3).txt",
-        # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/25kb 3889_100863_หัวข้อพิเศษด้านเทคโนโลยีสารสนเทศ (ปี3).txt",
+        "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/25kb 3889_100863_หัวข้อพิเศษด้านเทคโนโลยีสารสนเทศ (ปี3).txt",
         # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/50kb 3922_310863_หลักการเขียนโปรแกรม (ปี1) test.txt",
-        "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/60kb 3874_030863_หลักการเขียนโปรแกรม (ปี1) - test.txt"
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/60kb 3913_240863_หลักการเขียนโปรแกรม (ปี1) - test.txt",
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/60kb 3874_030863_หลักการเขียนโปรแกรม (ปี1) - test.txt"
 
     ]
     hPath = [
         # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/10kb 3911 test.txt",
-        # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/25kb 3889 test.txt",
+        "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/25kb 3889 test.txt",
         # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/50kb 3922 test.txt",
-        "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/60kb 3874 - Copy.txt"
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/60kb 3913 test.txt",
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/60kb 3874 - Copy.txt"
     ]
 
-    threshold = 10
+    threshold = 20
     # size = range(50,51,6)
-    size= [1000]
+    size= [9100]
     print(">>> size :",size)
     
     
     for j,path in enumerate(rPath):
-        dataWrite = []
         for i,chunkSize in enumerate(size):
             with codecs.open(rPath[j], 'r', encoding="utf-8") as file:
-                r = file.read().replace(" ", "").lower()
+                r = file.read().replace(" ", "").lower().replace("\n","")
             with codecs.open(hPath[j], 'r', encoding="utf-8") as file:
-                h = file.read().replace(" ", "").lower()
+                h = file.read().replace(" ", "").lower().replace("\n","")
+                fileName = os.path.splitext(os.path.split(hPath[j])[1])[0]
 
-            dataTest = testRun(r,h,chunkSize,threshold)
-            dataWrite.append((chunkSize,threshold,dataTest[0],dataTest[1]))
-            print(">>> size {} >> {}".format(chunkSize,dataTest))
-            time.sleep(1)
-
-
-        textWrite = ""
-        for data in dataWrite:
-            textWrite += os.path.split(rPath[j])[1]+"\t"+\
-            str(len(r)) + "\t" +\
-            str(len(h)) + "\t" +\
-            str(data[0]) + "\t"+\
-            str(data[1]) + "\t" +\
-                str(data[2]) + "\t"+\
-                str(data[3]) + "\n"
-
-        with codecs.open("./output/show log[{}].txt".format(j), 'w', encoding="utf-8") as file:
-            file.write(str(textWrite))
+            dataTest = testRun(r,h,chunkSize,threshold,fileName)
+           
+        with codecs.open("./output/{}[{}].json".format(fileName,j), 'w', encoding="utf-8") as file:
+            file.write(json.dumps(dataTest,indent=4))
