@@ -96,7 +96,7 @@ def findLastIndex(r, h, dimensions, threshold):
 
 def getChunk(r, h, threshold):
     # print("chunk : ", r, " >> ", h)
-    # print(">>> getChunk funtion")
+    print(">>> getChunk funtion")
     dimensions = generateMatrix(r, h)
     lastIndex = findLastIndex(r, h, dimensions, threshold)
     # try:
@@ -113,7 +113,7 @@ def getChunk(r, h, threshold):
 
 def WER(r, h):
     # print("WER r\n", r, "\n h : ", h)
-    # print(">>> WER funtion")
+    print(">>> WER funtion")
     """
     Given two list of strings how many word error rate(insert, delete or substitution).
     """
@@ -186,10 +186,11 @@ def WER(r, h):
         substitution, deletion, insertion, correct), "textTag": textTag}
     return dataReturn
 
-def writeHtml(resultDict,fileName):
+def writeHtml(provText,fileName):
     # resultDict = {"WER": result*100, "substitution": substitution,
     #  "memoryOverload": memoryOverload,
     #  "deletion": deletion, "insertion": insertion, "correct": correct,
+    resultDict = provText['resultDict']
     html = """
     <!DOCTYPE html>
     <html>
@@ -223,15 +224,19 @@ def writeHtml(resultDict,fileName):
         3: "correct"
     }
 
-    html += """
-    <div >Accuracy : {}</div> 
-    <div class="substitution">Substitution : {}</div> 
-    <div class="deletion">Deletion : {}</div>
-    <div class="insertion">Insertion : {}</div> 
-    <div class="correct">Correct : {}</div>
-    <div>Total : {}</div><br>  """.format(100-resultDict["WER"],resultDict["substitution"],resultDict["deletion"],resultDict["insertion"],
-    resultDict["correct"],0)
-
+    # html += """
+    # <div >Accuracy : {}</div> 
+    # <div class="substitution">Substitution : {}</div> 
+    # <div class="deletion">Deletion : {}</div>
+    # <div class="insertion">Insertion : {}</div> 
+    # <div class="correct">Correct : {}</div>
+    # <div>Total : {}</div><br>  """.format(100-resultDict["WER"],resultDict["substitution"],resultDict["deletion"],resultDict["insertion"],
+    # resultDict["correct"],0)
+    notShow =["resultDict","chunkList","PID"]
+    for item in provText:
+        if(item in notShow):
+            continue
+        html += "<div >{} : {}</div> ".format(item,provText[item])
     for listTage in resultDict["textTag"]:
         if(listTage[0] != 0 and listTage[0] != 1):
             html += "<span class='{}'>{}</span>".format(
@@ -267,7 +272,7 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
     upChunkSize = 0
     isFinal = False
     memoryOverload = False
-    # print("\nlength r :",id(r),"-",len(r)-1,"\nlength h :",id(h),"-",len(h)-1)
+    print("\nlength r :",len(r),"\nlength h :",len(h))
     textTag = []
 
     while(not isFinal):
@@ -280,7 +285,7 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
             memoryOverload = True
             break
 
-        # print("last index :", lastIndex)
+        print("last index :", lastIndex)
         # not match or correct lower threshold
         if(lastIndex == []):
             # check last char in ref and hyp
@@ -339,7 +344,7 @@ def testRun(r,h,chunkSize,threshold,fileName):
     startTime = time.time()
     resultDict = measureByWER(r, h, threshold, chunkSize, maxLength)
     endTime = time.time()
-    writeHtml(resultDict,fileName)
+    
     memeryUse = process.memory_info().rss*0.000001
     provText = {
         "pathFileNameRef": rPath,
@@ -350,6 +355,7 @@ def testRun(r,h,chunkSize,threshold,fileName):
         "duration": endTime-startTime,
         "totalCorrect":len(r),
         "totalRaw":len(h),
+        "resultDict":resultDict,
         "substitution": resultDict["substitution"],
         "deletion": resultDict["deletion"],
         "insertion": resultDict["insertion"],
@@ -363,6 +369,7 @@ def testRun(r,h,chunkSize,threshold,fileName):
         "memeryUse": memeryUse,
         "chunkList": resultDict["chunkList"]
     }
+    writeHtml(provText,fileName)
     return provText
     # with codecs.open("./output/output_prove.json", 'w', encoding="utf-8") as file:
     #     file.write(str(json.dumps(provText, indent=4)))
@@ -381,36 +388,55 @@ if __name__ == "__main__":
     r = "เราไปทำงานที่นี่น้า"
     h = "เรไปทงานที่นี่น้ะ"
     rPath = [
+        # "./rTest.txt"
         # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/10kb 3911_240863 พาณิชย์อิเล็กทรอนิกส์ (ปี 3).txt",
-        "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/25kb 3889_100863_หัวข้อพิเศษด้านเทคโนโลยีสารสนเทศ (ปี3).txt",
-        # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/50kb 3922_310863_หลักการเขียนโปรแกรม (ปี1) test.txt",
+        "C:/Users/Admin/Desktop/เทียบเฉลย/สำหรับทดสอบ/correct test/50kb 3922_310863_หลักการเขียนโปรแกรม (ปี1) test.txt",
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/สำหรับทดสอบ/correct test/25kb 3889_100863_หัวข้อพิเศษด้านเทคโนโลยีสารสนเทศ (ปี3).txt",
         # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/60kb 3913_240863_หลักการเขียนโปรแกรม (ปี1) - test.txt",
         # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/60kb 3874_030863_หลักการเขียนโปรแกรม (ปี1) - test.txt"
 
     ]
     hPath = [
+        # "./hTest.txt"
         # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/10kb 3911 test.txt",
-        "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/25kb 3889 test.txt",
-        # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/50kb 3922 test.txt",
+        "C:/Users/Admin/Desktop/เทียบเฉลย/สำหรับทดสอบ/raw test/50kb 3922 test.txt",
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/สำหรับทดสอบ/raw test/25kb 3889 test.txt",
         # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/60kb 3913 test.txt",
         # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/60kb 3874 - Copy.txt"
     ]
 
-    threshold = 20
+    threshold = 10
     # size = range(50,51,6)
-    size= [9100]
+    size= [2000]
     print(">>> size :",size)
     
     
     for j,path in enumerate(rPath):
         for i,chunkSize in enumerate(size):
             with codecs.open(rPath[j], 'r', encoding="utf-8") as file:
-                r = file.read().replace(" ", "").lower().replace("\n","")
+                filer = file.read().lower()
+                filer = filer.replace(" ","")
+                filer = filer.replace("\n","")
+                filer = filer.replace("\r","")
             with codecs.open(hPath[j], 'r', encoding="utf-8") as file:
-                h = file.read().replace(" ", "").lower().replace("\n","")
-                fileName = os.path.splitext(os.path.split(hPath[j])[1])[0]
+                fileh = file.read().lower()
+                fileh = fileh.replace(" ","")
+                fileh = fileh.replace("\n","")
+                fileh = fileh.replace("\r","")
 
-            dataTest = testRun(r,h,chunkSize,threshold,fileName)
-           
+                fileName = os.path.splitext(os.path.split(hPath[j])[1])[0]
+            dataTest = testRun(filer,fileh,chunkSize,threshold,fileName)
+
         with codecs.open("./output/{}[{}].json".format(fileName,j), 'w', encoding="utf-8") as file:
             file.write(json.dumps(dataTest,indent=4))
+
+
+    def finished():
+        import winsound
+        # milliseconds
+        freq = 400  # Hz
+        duration = 450
+        for i in range(3):        
+            winsound.Beep(freq, duration)
+            duration -= 100
+    finished()
