@@ -93,21 +93,99 @@ def findLastIndex(r, h, dimensions, threshold):
     # Probability to return [] [num,num]
     return lastIndex
 
+def findLastIndex2(r, h, dimensions, threshold):
+    x = len(r)
+    y = len(h)
+
+    substitution = 0 # 0
+    deletion = 0    # 1
+    insertion = 0   # 2
+    correct = 0     # 3
+    textTag = []
+    countCharlecter = 0
+    getValue = False
+    overTheshold = False
+    def clearValue():
+        textTag = []
+        countCharlecter = 0
+
+    while True:
+        if x == 0 and y == 0:
+            break
+        if(x == 0 and y > 0):
+            # insertion
+            y = y - 1
+            insertion = insertion + 1
+            if(not overTheshold):
+                clearValue()
+            else:
+                textTag.append((2, (h[y])))
+        elif(x > 0 and y == 0):
+            # deletion
+            x = x - 1
+            deletion = deletion + 1
+            
+            if(not overTheshold):
+                clearValue()
+            else:
+                textTag.append((1, (r[x])))
+        elif(r[x-1] == h[y-1]):
+            # correct
+            x = x-1
+            y = y-1
+            correct = correct + 1
+            countCharlecter += 1
+            if(countCharlecter ==1 and getValue):
+                textTag = []
+            if(countCharlecter >=1):
+                textTag.append((3, (h[y])))
+                
+            if(countCharlecter == 1):
+                getValue = True                
+                lastIndex = [x, y]
+            if(countCharlecter >= threshold):
+                overTheshold = True
+
+        elif dimensions[x][y] == dimensions[x - 1][y - 1] + 1:   
+            # substitution
+            x = x - 1
+            y = y - 1
+            substitution = substitution + 1            
+            if(not overTheshold):
+                clearValue()
+            else:
+                textTag.append((0, (r[x], h[y])))
+        elif dimensions[x][y] == dimensions[x - 1][y] + 1:        
+            # deletion
+            x = x - 1
+            deletion = deletion + 1            
+            if(not overTheshold):
+                clearValue()
+            else:
+                textTag.append((1, (r[x])))
+        elif dimensions[x][y] == dimensions[x][y - 1] + 1:        
+            # insertion
+            y = y - 1
+            insertion = insertion + 1
+            if(not overTheshold):
+                clearValue()
+            else:
+                textTag.append((2, (h[y])))
+        else:
+            print('\nWe got an error.')
+            break
+
+    # print(">>>", substitution, deletion, insertion, correct)
+    textTag.reverse()
+    dataReturn = {"abstract": (substitution, deletion, insertion, correct), "textTag": textTag,"lastIndex":lastIndex}
+    return dataReturn
 
 def getChunk(r, h, threshold):
     # print("chunk : ", r, " >> ", h)
     print(">>> getChunk funtion")
     dimensions = generateMatrix(r, h)
-    lastIndex = findLastIndex(r, h, dimensions, threshold)
-    # try:
-    #     text = "ผลของเฉลย : "+str(r[:lastIndex[0]])+"\nผลของตัวเทียบ : "+h[:lastIndex[1]]
-    # except Exception as e:
-    #     text = "ผลของเฉลย : "+str(r[:])+"\nผลของตัวเทียบ : "+h[:]
-    #     print(e)
-    # print("ผลของเฉลย : ",r[:lastIndex[0]])
-    # print("ผลของตัวเทียบ : ",h[:lastIndex[1]])
-    # with codecs.open("result.txt",mode='w',encoding='utf-8') as file:
-    #     file.write(str(text))
+    lastIndex = findLastIndex2(r, h, dimensions, threshold)
+
     return lastIndex
 
 
@@ -117,6 +195,7 @@ def WER(r, h):
     """
     Given two list of strings how many word error rate(insert, delete or substitution).
     """
+    print(">>> length r :{}\n>>> length h :{}".format(len(r),len(h)))
     dimensions = numpy.zeros((len(r) + 1) * (len(h) + 1), dtype=numpy.uint16)
     dimensions = dimensions.reshape((len(r) + 1, len(h) + 1))
     for i in range(len(r) + 1):
@@ -279,19 +358,21 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
         # print("-------------------------\n")
         if(len(r[indexReference:indexReference+chunkSize+upChunkSize]) <= maxLength and
            len(h[indexHypothesis:indexHypothesis+chunkSize+upChunkSize]) <= maxLength):
-            lastIndex = getChunk(r[indexReference:indexReference+chunkSize+upChunkSize],
+            resultChunk = getChunk(r[indexReference:indexReference+chunkSize+upChunkSize],
                                  h[indexHypothesis:indexHypothesis+chunkSize+upChunkSize], threshold)
+            lastIndex = resultChunk['lastIndex']
         else:
             memoryOverload = True
             break
-
+        # dataReturn = {"abstract": (
+        # substitution, deletion, insertion, correct), "textTag": textTag}
         print("last index :", lastIndex)
         # not match or correct lower threshold
         if(lastIndex == []):
             # check last char in ref and hyp
             if(((indexReference+chunkSize >= len(r)-1) or (indexHypothesis+chunkSize >= len(h)-1)) and
                (len(r[indexReference:]) <= maxLength) and len(h[indexHypothesis:]) <= maxLength):
-                werData = WER(r[indexReference:], h[indexHypothesis:])
+                werData = resultChunk
                 indexReference += len(r[indexReference:])-1
                 indexHypothesis += len(h[indexHypothesis:])-1
                 chunkList.append(
@@ -306,8 +387,7 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
         # threshold ok
         else:
             upChunkSize = 0
-            werData = WER(r[indexReference:indexReference+lastIndex[0]+1],
-                          h[indexHypothesis:indexHypothesis+lastIndex[1]+1])
+            werData = resultChunk
             chunkList.append((r[indexReference:indexReference+lastIndex[0]+1],
                              h[indexHypothesis:indexHypothesis+lastIndex[1]+1], werData["abstract"]))
             # sum 1 because next char
@@ -389,8 +469,9 @@ if __name__ == "__main__":
     h = "เรไปทงานที่นี่น้ะ"
     rPath = [
         # "./rTest.txt"
-        # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/10kb 3911_240863 พาณิชย์อิเล็กทรอนิกส์ (ปี 3).txt",
-        "C:/Users/Admin/Desktop/เทียบเฉลย/สำหรับทดสอบ/correct test/50kb 3922_310863_หลักการเขียนโปรแกรม (ปี1) test.txt",
+        "C:/tin work\check_accuracy_v1.0\Room/file\correct.txt"
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/สำหรับทดสอบ/correct test/10kb 3911_240863 พาณิชย์อิเล็กทรอนิกส์ (ปี 3).txt",
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/สำหรับทดสอบ/correct test/50kb 3922_310863_หลักการเขียนโปรแกรม (ปี1) test.txt",
         # "C:/Users/Admin/Desktop/เทียบเฉลย/สำหรับทดสอบ/correct test/25kb 3889_100863_หัวข้อพิเศษด้านเทคโนโลยีสารสนเทศ (ปี3).txt",
         # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/60kb 3913_240863_หลักการเขียนโปรแกรม (ปี1) - test.txt",
         # "C:/Users/Admin/Desktop/เทียบเฉลย/correct test/60kb 3874_030863_หลักการเขียนโปรแกรม (ปี1) - test.txt"
@@ -398,16 +479,17 @@ if __name__ == "__main__":
     ]
     hPath = [
         # "./hTest.txt"
-        # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/10kb 3911 test.txt",
-        "C:/Users/Admin/Desktop/เทียบเฉลย/สำหรับทดสอบ/raw test/50kb 3922 test.txt",
+        "C:/tin work\check_accuracy_v1.0\Room/file/raw.txt"
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/สำหรับทดสอบ/raw test/10kb 3911 test.txt",
+        # "C:/Users/Admin/Desktop/เทียบเฉลย/สำหรับทดสอบ/raw test/50kb 3922 test.txt",
         # "C:/Users/Admin/Desktop/เทียบเฉลย/สำหรับทดสอบ/raw test/25kb 3889 test.txt",
         # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/60kb 3913 test.txt",
         # "C:/Users/Admin/Desktop/เทียบเฉลย/raw test/60kb 3874 - Copy.txt"
     ]
 
-    threshold = 10
+    threshold = 100
     # size = range(50,51,6)
-    size= [2000]
+    size= [1000]
     print(">>> size :",size)
     
     
