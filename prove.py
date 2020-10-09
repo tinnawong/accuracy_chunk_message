@@ -93,7 +93,7 @@ def findLastIndex(r, h, dimensions, threshold):
     # Probability to return [] [num,num]
     return lastIndex
 
-def findLastIndex2(r, h, dimensions, threshold):
+def findLastIndex2(r, h, dimensions, threshold,textFinal):
     x = len(r)
     y = len(h)
 
@@ -104,10 +104,10 @@ def findLastIndex2(r, h, dimensions, threshold):
     textTag = []
     countCharlecter = 0
     getValue = False
-    overTheshold = False
-    def clearValue():
-        textTag = []
-        countCharlecter = 0
+    if(textFinal):
+        overTheshold = True
+    else:
+        overTheshold = False
 
     while True:
         if x == 0 and y == 0:
@@ -117,7 +117,8 @@ def findLastIndex2(r, h, dimensions, threshold):
             y = y - 1
             insertion = insertion + 1
             if(not overTheshold):
-                clearValue()
+                textTag = []
+                countCharlecter = 0
             else:
                 textTag.append((2, (h[y])))
         elif(x > 0 and y == 0):
@@ -126,7 +127,8 @@ def findLastIndex2(r, h, dimensions, threshold):
             deletion = deletion + 1
             
             if(not overTheshold):
-                clearValue()
+                textTag = []
+                countCharlecter = 0
             else:
                 textTag.append((1, (r[x])))
         elif(r[x-1] == h[y-1]):
@@ -152,7 +154,8 @@ def findLastIndex2(r, h, dimensions, threshold):
             y = y - 1
             substitution = substitution + 1            
             if(not overTheshold):
-                clearValue()
+                textTag = []
+                countCharlecter = 0
             else:
                 textTag.append((0, (r[x], h[y])))
         elif dimensions[x][y] == dimensions[x - 1][y] + 1:        
@@ -160,7 +163,8 @@ def findLastIndex2(r, h, dimensions, threshold):
             x = x - 1
             deletion = deletion + 1            
             if(not overTheshold):
-                clearValue()
+                textTag = []
+                countCharlecter = 0
             else:
                 textTag.append((1, (r[x])))
         elif dimensions[x][y] == dimensions[x][y - 1] + 1:        
@@ -168,7 +172,8 @@ def findLastIndex2(r, h, dimensions, threshold):
             y = y - 1
             insertion = insertion + 1
             if(not overTheshold):
-                clearValue()
+                textTag = []
+                countCharlecter = 0
             else:
                 textTag.append((2, (h[y])))
         else:
@@ -180,11 +185,11 @@ def findLastIndex2(r, h, dimensions, threshold):
     dataReturn = {"abstract": (substitution, deletion, insertion, correct), "textTag": textTag,"lastIndex":lastIndex}
     return dataReturn
 
-def getChunk(r, h, threshold):
+def getChunk(r, h, threshold,textFinal):
     # print("chunk : ", r, " >> ", h)
     print(">>> getChunk funtion")
     dimensions = generateMatrix(r, h)
-    lastIndex = findLastIndex2(r, h, dimensions, threshold)
+    lastIndex = findLastIndex2(r, h, dimensions, threshold,textFinal)
 
     return lastIndex
 
@@ -358,8 +363,12 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
         # print("-------------------------\n")
         if(len(r[indexReference:indexReference+chunkSize+upChunkSize]) <= maxLength and
            len(h[indexHypothesis:indexHypothesis+chunkSize+upChunkSize]) <= maxLength):
+            if((indexReference+chunkSize+upChunkSize>=len(r)) and (indexHypothesis+chunkSize+upChunkSize>=len(h))):
+                textFinal = True
+            else:
+                textFinal = False
             resultChunk = getChunk(r[indexReference:indexReference+chunkSize+upChunkSize],
-                                 h[indexHypothesis:indexHypothesis+chunkSize+upChunkSize], threshold)
+                                 h[indexHypothesis:indexHypothesis+chunkSize+upChunkSize], threshold,textFinal)
             lastIndex = resultChunk['lastIndex']
         else:
             memoryOverload = True
