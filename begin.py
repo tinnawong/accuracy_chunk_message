@@ -8,7 +8,7 @@ print(process.memory_info().rss)
 print(pow(2,2))
 
 # อ่านไฟล์จาก output_prove.json แล้วแยกผลแต่ละ chunk เป็นไฟล์เก็บไว้เพื่อไปเทียบกับ method WER_
-with codecs.open("output/file issu/50kb 3922 test[0].json",'r',encoding="utf-8") as file:
+with codecs.open("output/raw[0].json",'r',encoding="utf-8") as file:
     data = file.read()
     jsonData = json.loads(data)
 writeText =''
