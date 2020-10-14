@@ -69,7 +69,7 @@ def calculateStatisticWord(textRaw, patterns, thresholdStatisticWord=1):
 
 if __name__ == "__main__":
 
-    from glexService import Glex
+    from glexSegment import Glex
     import re
     import json
     glex = Glex()

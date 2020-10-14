@@ -149,12 +149,12 @@ if __name__ == "__main__":
     import psutil
     import time
     import json
-
+    # ฟังก์ชันไฟล์นี้วัดความถูกต้องแบบทั้งไฟล์ไม่ได้ตัดเป็น chunk ไฟล์นี้ใช้สำหรับเปรียบเทียบกับแบบตัดเป็น chunk
     r = "เราไปทำงานที่นี่น้า"
     h = "เรไปทงานที่นี่น้ะ"
 
-    rPath = "C:/Users\Admin\Desktop\เทียบเฉลย\correct/test2.txt"
-    hPath = "C:/Users\Admin\Desktop\เทียบเฉลย/raw/test2.txt"
+    rPath = "C:/Users\Admin\Desktop\เทียบเฉลย\correct/test.txt"
+    hPath = "C:/Users\Admin\Desktop\เทียบเฉลย/raw/test.txt"
 
     with codecs.open(rPath, 'r', encoding="utf-8") as file:
         r = file.read().replace(" ", "").lower()
