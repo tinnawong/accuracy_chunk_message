@@ -235,7 +235,7 @@ def writeHtml(provText,fileName):
         2: "insertion",
         3: "correction"
     }
-    vowelsThai = ['่','้','๊','๋','็','ั','ิ',"ี",'ึ','ื','ำ']
+    vowelsThai = ['่','้','๊','๋','็','ั','ิ',"ี",'ึ','ื','ำ','์','ุ','ู']
     notShow =["resultDict","chunkList","PID"]
     for item in provText:
         if(item in notShow):
@@ -296,12 +296,12 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
     insertion = 0
     correction = 0
     upChunkSize = 0
-    isFinal = False
+    textFinal = False
     memoryOverload = False
     print("\nlength r :",len(r),"\nlength h :",len(h))
     textTag = []
 
-    while(not isFinal):
+    while(not textFinal):
         # print("-------------------------\n")
         # get chunk with operator
         if(len(r[indexReference:indexReference+chunkSize+upChunkSize]) <= maxLength and
@@ -325,9 +325,7 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
                (len(r[indexReference:]) <= maxLength) and len(h[indexHypothesis:]) <= maxLength):
                 indexReference += len(r[indexReference:])-1
                 indexHypothesis += len(h[indexHypothesis:])-1
-                chunkList.append(
-                    (r[indexReference:], h[indexHypothesis:], resultChunk["abstract"]))
-                isFinal = True
+                chunkList.append((r[indexReference:], h[indexHypothesis:], resultChunk["abstract"]))
             else:
                 # If large jump (large upChunkSize) may to condition memoryOverload
                 upChunkSize += 2000
@@ -348,9 +346,6 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
         deletion += resultChunk["abstract"][1]
         insertion += resultChunk["abstract"][2]
         correction += resultChunk["abstract"][3]
-
-        if(textFinal):
-            break
 
     print("\n\n>>>", substitution, deletion, insertion, correction)
     result = float((substitution+deletion+insertion)/len(r))
@@ -415,14 +410,14 @@ if __name__ == "__main__":
                 if(keyFile in fileName):
                     allPath.append(os.path.join(directory,fileName))
         return allPath
-    rDir = "C:/Users/tinna/Downloads/ส่งให้ทีม partii-20201011T104156Z-001/ส่งให้ทีม partii/correct"
-    hDir = "C:/Users/tinna/Downloads/ส่งให้ทีม partii-20201011T104156Z-001/ส่งให้ทีม partii/raw/google/"
-    rPath = genPathFile(rDir,"Digi" )
-    hPath = genPathFile(hDir,"Digi")
+    rDir = "C:/Users\Admin\Desktop\เทียบเฉลย\สำหรับทดสอบ/correct test/"
+    hDir = "C:/Users\Admin\Desktop\เทียบเฉลย\สำหรับทดสอบ/raw test/"
+    rPath = genPathFile(rDir,"50k" )
+    hPath = genPathFile(hDir,"50k")
 
-    threshold = 100
+    threshold = 10
     # size = range(2000,3000)
-    size= [3000]
+    size= [2000]
     print(">>> size :",size)
     
     
