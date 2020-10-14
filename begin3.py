@@ -68,13 +68,13 @@ def calculateStatisticWord(textRaw, patterns, thresholdStatisticWord=1):
 
 
 if __name__ == "__main__":
-
+    
     from glexSegment import Glex
     import re
     import json
     glex = Glex()
 
-    pathFile = "C:/Users\Admin\Desktop\เทียบเฉลย\สำหรับทดสอบ\correct test/50kb 3922_310863_หลักการเขียนโปรแกรม (ปี1) test.txt"
+    pathFile = "C:/Users/tinna/Downloads/ส่งให้ทีม partii-20201011T104156Z-001/ส่งให้ทีม partii/correct/Digital_Thailand_BigBang_2018_กล่าวเปิดงานและแสดงปาฐกถาพิเศษ.txt"
     # pathFile = "./rTest.txt"
     textRaw = getTextFromFile(pathFile)
     with codecs.open("./output/fileTest.txt", "w", encoding="utf-8") as f:
