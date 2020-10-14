@@ -25,10 +25,12 @@ if __name__ == "__main__":
                 if(keyFile in fileName):
                     allPath.append(os.path.join(directory,fileName))
         return allPath
-    rDir = "C:/Users/tinna/Downloads/ส่งให้ทีม partii-20201011T104156Z-001/ส่งให้ทีม partii/correct"
-    hDir = "C:/Users/tinna/Downloads/ส่งให้ทีม partii-20201011T104156Z-001/ส่งให้ทีม partii/raw/google/"
-    rPath = genPathFile(rDir,"" )
-    hPath = genPathFile(hDir,"")
+
+    rDir = "C:/Users\Admin\Desktop\เทียบเฉลย\สำหรับทดสอบ/correct test/"
+    hDir = "C:/Users\Admin\Desktop\เทียบเฉลย\สำหรับทดสอบ/raw test/"
+
+    rPath = genPathFile(rDir,"" )[:3]
+    hPath = genPathFile(hDir,"")[:3]
 
     threshold = 100
     # size = range(2000,3000)
@@ -70,7 +72,9 @@ if __name__ == "__main__":
                         math = True
                         checkList =["insertion","deletion","substitution","correction","referenceLength","hypothesisLength"]
                         for check in checkList:
-                            if(resultProve[check] != response[check]):
+                            if(resultProve[check] == response[check]):
+                                print(">>> {} match : {} = {}".format(check,resultProve[check] , response[check]))
+                            else:
                                 print(">>> {} not match : {} != {}".format(check,resultProve[check] , response[check]))
                                 math = False
                         if(not math):
