@@ -1,2 +1,4 @@
 gitpython
 tltk
+unicategories
+Unidecode
