@@ -14,6 +14,7 @@ import os
 import psutil
 import time
 import json
+from unicategories import unicodedata
 # reference(r) to the hypothesis(h)
 
 
@@ -47,6 +48,7 @@ def generateMatrix(r, h):
     # print("type : ", type(dimensions[0][0]))
     # print("dimensions id (generateMatrix)", id(dimensions))
     return dimensions
+
 
 def findLastIndex(r, h, dimensions, threshold):
     # print("dimensions id (findLastIndex) ", id(dimensions))
@@ -97,22 +99,23 @@ def findLastIndex(r, h, dimensions, threshold):
     # Probability to return [] [num,num]
     return lastIndex
 
-def findLastIndex2(r, h, dimensions, threshold,textFinal):
+
+def findLastIndex2(r, h, dimensions, threshold, textFinal):
     x = len(r)
     y = len(h)
-    print(">>> x: ",x," y:",y)
-    substitution = 0 # 0
+    print(">>> x: ", x, " y:", y)
+    substitution = 0  # 0
     deletion = 0    # 1
     insertion = 0   # 2
     correction = 0     # 3
     textTag = []
     countCharlecter = 0
-    lastIndex = [0,0]
+    lastIndex = [0, 0]
 
     if(textFinal):
         overTheshold = True
         getValue = True
-        lastIndex = [x-1,y-1]
+        lastIndex = [x-1, y-1]
     else:
         overTheshold = False
         getValue = False
@@ -125,13 +128,13 @@ def findLastIndex2(r, h, dimensions, threshold,textFinal):
             y = y - 1
             insertion = insertion + 1
             if(not overTheshold):
-                countCharlecter = 0  
+                countCharlecter = 0
             if(getValue):
                 textTag.append((2, (h[y])))
         elif(x > 0 and y == 0):
             # deletion
             x = x - 1
-            deletion = deletion + 1            
+            deletion = deletion + 1
             if(not overTheshold):
                 countCharlecter = 0
             if(getValue):
@@ -140,41 +143,41 @@ def findLastIndex2(r, h, dimensions, threshold,textFinal):
             # correction
             x = x-1
             y = y-1
-            
+
             countCharlecter += 1
             if(countCharlecter == 1 and not textFinal):
                 textTag = []
-                substitution = 0 # 0
+                substitution = 0  # 0
                 deletion = 0    # 1
                 insertion = 0   # 2
                 correction = 0     # 3
-                getValue = True                
+                getValue = True
                 lastIndex = [x, y]
-            textTag.append((3, (h[y])))  
+            textTag.append((3, (h[y])))
 
             correction = correction + 1
 
             if(countCharlecter >= threshold):
                 overTheshold = True
 
-        elif dimensions[x][y] == dimensions[x - 1][y - 1] + 1:   
+        elif dimensions[x][y] == dimensions[x - 1][y - 1] + 1:
             # substitution
             x = x - 1
             y = y - 1
-            substitution = substitution + 1            
+            substitution = substitution + 1
             if(not overTheshold):
                 countCharlecter = 0
             if(getValue):
                 textTag.append((0, (r[x], h[y])))
-        elif dimensions[x][y] == dimensions[x - 1][y] + 1:        
+        elif dimensions[x][y] == dimensions[x - 1][y] + 1:
             # deletion
             x = x - 1
-            deletion = deletion + 1            
+            deletion = deletion + 1
             if(not overTheshold):
                 countCharlecter = 0
             if(getValue):
                 textTag.append((1, (r[x])))
-        elif dimensions[x][y] == dimensions[x][y - 1] + 1:        
+        elif dimensions[x][y] == dimensions[x][y - 1] + 1:
             # insertion
             y = y - 1
             insertion = insertion + 1
@@ -188,19 +191,34 @@ def findLastIndex2(r, h, dimensions, threshold,textFinal):
 
     # print(">>>", substitution, deletion, insertion, correction)
     textTag.reverse()
-    if((lastIndex[0]<threshold or lastIndex[1]<threshold) and  not textFinal):
-        lastIndex =[0,0]
-    dataReturn = {"abstract": (substitution, deletion, insertion, correction), "textTag": textTag,"lastIndex":lastIndex}
+    if((lastIndex[0] < threshold or lastIndex[1] < threshold) and not textFinal):
+        lastIndex = [0, 0]
+    dataReturn = {"abstract": (substitution, deletion, insertion,
+                               correction), "textTag": textTag, "lastIndex": lastIndex}
     return dataReturn
 
-def getChunk(r, h, threshold,textFinal):
+
+def getChunk(r, h, threshold, textFinal):
     print(">>> getChunk funtion")
     dimensions = generateMatrix(r, h)
-    lastIndex = findLastIndex2(r, h, dimensions, threshold,textFinal)
+    lastIndex = findLastIndex2(r, h, dimensions, threshold, textFinal)
 
     return lastIndex
 
-def writeHtml(provText,fileName):
+
+def isMn(aChar):
+    cc = u'{}'.format(aChar)
+    try:
+        if(unicodedata.category(cc) == "Mn"):
+            return 1
+        else:
+            return 0
+    except Exception as e:
+        print(">>> Error in isMn function :", e)
+        return 0
+
+
+def writeHtml(provText, fileName):
 
     resultDict = provText['resultDict']
     html = """
@@ -227,7 +245,7 @@ def writeHtml(provText,fileName):
         }
         </style>
     </head>
-    <body>"""%fileName
+    <body>""" % fileName
 
     dictTage = {
         0: "substitution",
@@ -235,53 +253,64 @@ def writeHtml(provText,fileName):
         2: "insertion",
         3: "correction"
     }
-    vowelsThai = ['่','้','๊','๋','็','ั','ิ',"ี",'ึ','ื','ำ','์','ุ','ู']
-    notShow =["resultDict","chunkList","PID"]
+    notShow = ["resultDict", "chunkList", "PID"]
     for item in provText:
         if(item in notShow):
             continue
-        html += "<div >{} : {}</div> ".format(item.capitalize(),provText[item])
-    
-    for i,listTage in enumerate(resultDict["textTag"]):
+        html += "<div >{} : {}</div> ".format(
+            item.capitalize(), provText[item])
+
+    substitutionBuffer = []
+    for i, listTage in enumerate(resultDict["textTag"]):
         # 0 substitution
         # 1 deletion
         # 2 insertion
         # 3 correction
         if(listTage[0] != 0):
             # for check befor if is subtitution do this condition
-            if(i>=1):
+            if(substitutionBuffer != []):
+                charCorrect = ''.join([str(elem[1])
+                                       for elem in substitutionBuffer])
+                charSub = ''.join([str(elem[0])
+                                   for elem in substitutionBuffer])
+                if(isMn(charCorrect[0])):
+                    charCorrect = "-"+charCorrect
+                if(isMn(charSub[0])):
+                    charSub = "-"+charSub
+
+                html += "<span class='{0}'>{1}({2})</span>".format(
+                    dictTage[0], charCorrect, charSub)
+                substitutionBuffer = []
+
+            if(i >= 1):
                 # (เ)-้ or ดิ -> -ิ wrong
-                if((resultDict["textTag"][i-1][0] == 0 and listTage[1] in vowelsThai) or (listTage[1] in vowelsThai and 
-                (resultDict["textTag"][i-1][0] != resultDict["textTag"][i-1][0]))):
+                if((resultDict["textTag"][i-1][0] == 0 and isMn(listTage[1])) or (isMn(listTage[1]) and
+                                                                                  (resultDict["textTag"][i-1][0] != resultDict["textTag"][i-1][0]))):
                     html += "<span class='{}'>-{}</span>".format(
-                    dictTage[listTage[0]], listTage[1])
-                
-                elif (listTage[1] in vowelsThai and re.findall("[ก-ฮ]",listTage[1])):
+                        dictTage[listTage[0]], listTage[1])
+
+                elif (isMn(listTage[1]) and re.findall("[ก-ฮ]", listTage[1])):
                     html += "<span class='{}'>-{}</span>".format(
-                    dictTage[listTage[0]], listTage[1])
-                else:                
+                        dictTage[listTage[0]], listTage[1])
+                else:
                     html += "<span class='{}'>{}</span>".format(
                         dictTage[listTage[0]], listTage[1])
             else:
                 html += "<span class='{}'>{}</span>".format(
                     dictTage[listTage[0]], listTage[1])
+
         else:
-            charCorrect = listTage[1][1]
-            charSub = listTage[1][0]
-            if(charSub in vowelsThai):
-                charSub = "-{}".format(charSub)
-            if(charCorrect in vowelsThai):
-                charCorrect = "-{}".format(charCorrect)
-            html += "<span class='{0}'>{1}({2})</span>".format(
-                dictTage[listTage[0]], charCorrect,charSub)
+            substitutionBuffer.append((listTage[1][0], listTage[1][1]))
+
+
     html += """
     </body>
     </html>
     """
-    for i in range(1,501,1):
-        if(not os.path.isfile("output/{}[{}].html".format(fileName,i))):
+    for i in range(1, 501, 1):
+        if(not os.path.isfile("output/{}[{}].html".format(fileName, i))):
             break
-    with codecs.open("output/{}[{}].html".format(fileName,i), 'w', encoding="utf-8") as file:
+    with codecs.open("output/{}[{}].html".format(fileName, i), 'w', encoding="utf-8") as file:
         file.write(html)
 
 
@@ -298,7 +327,7 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
     upChunkSize = 0
     textFinal = False
     memoryOverload = False
-    print("\nlength r :",len(r),"\nlength h :",len(h))
+    print("\nlength r :", len(r), "\nlength h :", len(h))
     textTag = []
 
     while(not textFinal):
@@ -306,12 +335,12 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
         # get chunk with operator
         if(len(r[indexReference:indexReference+chunkSize+upChunkSize]) <= maxLength and
            len(h[indexHypothesis:indexHypothesis+chunkSize+upChunkSize]) <= maxLength):
-            if((indexReference+chunkSize+upChunkSize>=len(r)) and (indexHypothesis+chunkSize+upChunkSize>=len(h))):
+            if((indexReference+chunkSize+upChunkSize >= len(r)) and (indexHypothesis+chunkSize+upChunkSize >= len(h))):
                 textFinal = True
             else:
                 textFinal = False
             resultChunk = getChunk(r[indexReference:indexReference+chunkSize+upChunkSize],
-                                 h[indexHypothesis:indexHypothesis+chunkSize+upChunkSize], threshold,textFinal)
+                                   h[indexHypothesis:indexHypothesis+chunkSize+upChunkSize], threshold, textFinal)
             lastIndex = resultChunk['lastIndex']
         else:
             memoryOverload = True
@@ -319,13 +348,14 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
         # dataReturn = {"abstract": (substitution, deletion, insertion, correction), "textTag": textTag}
         print("last index :", lastIndex)
         # not match or correct lower threshold
-        if(lastIndex == [0,0] and not textFinal):
+        if(lastIndex == [0, 0] and not textFinal):
             # check last char in ref and hyp
             if(((indexReference+chunkSize >= len(r)-1) or (indexHypothesis+chunkSize >= len(h)-1)) and
                (len(r[indexReference:]) <= maxLength) and len(h[indexHypothesis:]) <= maxLength):
                 indexReference += len(r[indexReference:])-1
                 indexHypothesis += len(h[indexHypothesis:])-1
-                chunkList.append((r[indexReference:], h[indexHypothesis:], resultChunk["abstract"]))
+                chunkList.append(
+                    (r[indexReference:], h[indexHypothesis:], resultChunk["abstract"]))
             else:
                 # If large jump (large upChunkSize) may to condition memoryOverload
                 upChunkSize += 2000
@@ -336,7 +366,7 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
         else:
             upChunkSize = 0
             chunkList.append((r[indexReference:indexReference+lastIndex[0]+1],
-                             h[indexHypothesis:indexHypothesis+lastIndex[1]+1], resultChunk["abstract"]))
+                              h[indexHypothesis:indexHypothesis+lastIndex[1]+1], resultChunk["abstract"]))
             # sum 1 because next char
             indexReference += lastIndex[0]+1
             indexHypothesis += lastIndex[1]+1
@@ -349,19 +379,19 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
 
     print("\n\n>>>", substitution, deletion, insertion, correction)
     result = float((substitution+deletion+insertion)/len(r))
-    resultDict = {"memoryOverload": memoryOverload,"WER": result*100, "substitution": substitution, 
+    resultDict = {"memoryOverload": memoryOverload, "WER": result*100, "substitution": substitution,
                   "deletion": deletion, "insertion": insertion, "correction": correction,
                   "chunkList": chunkList, "textTag": textTag}
     return resultDict
 
 
-def testRun(r,h,rPath,hPath,chunkSize,threshold,fileName,createHtml =True):
+def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True):
     maxLength = 20000
     process = psutil.Process(os.getpid())
     startTime = time.time()
     resultDict = measureByWER(r, h, threshold, chunkSize, maxLength)
     endTime = time.time()
-    
+
     memeryUse = process.memory_info().rss*0.000001
     provText = {
         "pathFileNameRef": rPath,
@@ -370,15 +400,15 @@ def testRun(r,h,rPath,hPath,chunkSize,threshold,fileName,createHtml =True):
         "start": startTime,
         "endTime": endTime,
         "duration": endTime-startTime,
-        "referenceLength":len(r),
-        "hypothesisLength":len(h),
-        "resultDict":resultDict,
+        "referenceLength": len(r),
+        "hypothesisLength": len(h),
+        "resultDict": resultDict,
         "substitution": resultDict["substitution"],
         "deletion": resultDict["deletion"],
         "insertion": resultDict["insertion"],
         "correction": resultDict["correction"],
         "characterErrorRate": resultDict["WER"],
-        "accuracy":100 - resultDict["WER"],
+        "accuracy": 100 - resultDict["WER"],
         "maxLength": maxLength,
         "threshold": threshold,
         "chunkSize": chunkSize,
@@ -387,7 +417,7 @@ def testRun(r,h,rPath,hPath,chunkSize,threshold,fileName,createHtml =True):
         "chunkList": resultDict["chunkList"]
     }
     if(createHtml):
-        writeHtml(provText,fileName)
+        writeHtml(provText, fileName)
     return provText
     # with codecs.open("./output/output_prove.json", 'w', encoding="utf-8") as file:
     #     file.write(str(json.dumps(provText, indent=4)))
@@ -400,53 +430,52 @@ if __name__ == "__main__":
     # 2 insertion
     # 3 correction
 
-    def genPathFile(directory,keyFile=None):
+    def genPathFile(directory, keyFile=None):
         files = os.listdir(directory)
-        allPath =[]
-        for fileName  in files:
+        allPath = []
+        for fileName in files:
             if(not keyFile):
-                allPath.append(os.path.join(directory,fileName))
+                allPath.append(os.path.join(directory, fileName))
             else:
                 if(keyFile in fileName):
-                    allPath.append(os.path.join(directory,fileName))
+                    allPath.append(os.path.join(directory, fileName))
         return allPath
-    rDir = "C:/Users\Admin\Desktop\เทียบเฉลย\สำหรับทดสอบ/correct test/"
-    hDir = "C:/Users\Admin\Desktop\เทียบเฉลย\สำหรับทดสอบ/raw test/"
-    rPath = genPathFile(rDir,"50k" )
-    hPath = genPathFile(hDir,"50k")
+    rDir = "C:/Users\Admin\Desktop\เทียบเฉลย/ไฟล์ทดสอบเพิ่มเติม/correct/"
+    hDir = "C:/Users\Admin\Desktop\เทียบเฉลย/ไฟล์ทดสอบเพิ่มเติม/raw"
+    rPath = genPathFile(rDir, "")[:2]
+    hPath = genPathFile(hDir, "")[:2]
 
-    threshold = 10
+    threshold = 100
     # size = range(2000,3000)
-    size= [2000]
-    print(">>> size :",size)
-    
-    
-    for j,path in enumerate(rPath):
-        for i,chunkSize in enumerate(size):
+    size = [3000]
+    print(">>> size :", size)
+
+    for j, path in enumerate(rPath):
+        for i, chunkSize in enumerate(size):
             with codecs.open(rPath[j], 'r', encoding="utf-8") as file:
                 filer = file.read().lower()
-                filer = filer.replace(" ","")
-                filer = filer.replace("\n","")
-                filer = filer.replace("\r","")
+                filer = filer.replace(" ", "")
+                filer = filer.replace("\n", "")
+                filer = filer.replace("\r", "")
             with codecs.open(hPath[j], 'r', encoding="utf-8") as file:
                 fileh = file.read().lower()
-                fileh = fileh.replace(" ","")
-                fileh = fileh.replace("\n","")
-                fileh = fileh.replace("\r","")
+                fileh = fileh.replace(" ", "")
+                fileh = fileh.replace("\n", "")
+                fileh = fileh.replace("\r", "")
 
                 fileName = os.path.splitext(os.path.split(hPath[j])[1])[0]
-            dataTest = testRun(filer,fileh,rPath[j],hPath[j],chunkSize,threshold,fileName)
+            dataTest = testRun(
+                filer, fileh, rPath[j], hPath[j], chunkSize, threshold, fileName)
 
-        with codecs.open("./output/{}[{}].json".format(fileName,j), 'w', encoding="utf-8") as file:
-            file.write(json.dumps(dataTest,indent=4,ensure_ascii=False))
-
+        with codecs.open("./output/{}[{}].json".format(fileName, j), 'w', encoding="utf-8") as file:
+            file.write(json.dumps(dataTest, indent=4, ensure_ascii=False))
 
     def finished():
         import winsound
         # milliseconds
         freq = 400  # Hz
         duration = 450
-        for i in range(2):        
+        for i in range(2):
             winsound.Beep(freq, duration)
             duration -= 100
     finished()
