@@ -27,7 +27,7 @@ def genPatternSearch(textInput, stepLength, stepNext=1, startIndex=0, stopIndex=
     return pattern
 
 
-def calculateStatisticWord(textRaw, patterns, thresholdStatisticWord=1):
+def calculateStatisticPattern(textRaw, patterns, thresholdStatisticWord=1):
     totalResult = {}
     lastIndexSearch = len(textRaw)
     patterns = set(patterns)
@@ -68,23 +68,24 @@ def calculateStatisticWord(textRaw, patterns, thresholdStatisticWord=1):
 
 
 if __name__ == "__main__":
-    
+    # generate pattern for search
     from glexSegment import Glex
     import re
     import json
     glex = Glex()
 
-    pathFile = "C:/Users/tinna/Downloads/ส่งให้ทีม partii-20201011T104156Z-001/ส่งให้ทีม partii/correct/Digital_Thailand_BigBang_2018_กล่าวเปิดงานและแสดงปาฐกถาพิเศษ.txt"
+    pathFile = "C:/Users\Admin\Desktop\เทียบเฉลย\สำหรับทดสอบ/correct test/50kb 3922_310863_หลักการเขียนโปรแกรม (ปี1) test.txt"
     # pathFile = "./rTest.txt"
     textRaw = getTextFromFile(pathFile)
-    with codecs.open("./output/fileTest.txt", "w", encoding="utf-8") as f:
+    with codecs.open("./output/output_begin3.txt", "w", encoding="utf-8") as f:
         f.write(textRaw)
     # segment 
     textSegment = glex.glexSegment(textRaw)["results"]
-    stepLength = 4
-    stepNext = 1
+    # textSegment = textRaw
+    stepLength = 5
+    stepNext = 3
     # startIndex =0
     # stopIndex = 0
     thresholdStatisticWord = 2
     patterns = genPatternSearch(textSegment, stepLength, stepNext)
-    calculateStatisticWord(textRaw, patterns, thresholdStatisticWord)
+    calculateStatisticPattern(textRaw, patterns, thresholdStatisticWord)

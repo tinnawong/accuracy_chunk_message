@@ -14,17 +14,19 @@ from WER_ import get_word_error_rate
 #     get_word_error_rate(r,h)
 #     print("\n")
 
+from unicategories import unicodedata
 
-text ="dfdf"
+def isMn(aChar):
+    cc = u'{}'.format(aChar)
+    try:
+        if(unicodedata.category(cc)=="Mn"):
+            return 1
+        else:
+            return 0
+    except Exception as e:
+        print(">>> Error in isMn function :",e)
+        return 0
 
-def clear(*arg):
-    for i,d in enumerate(arg):
-        if(isinstance(d, int)):
-            d = 0
-        elif(isinstance(d, str)):
-            d = ""
-        elif(isinstance(d, list)):
-            d = []
-
-clear(text)
-print(text)
+tt= "้กดกด"
+tt  ="-" + tt
+print(tt)

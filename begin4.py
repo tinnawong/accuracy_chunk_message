@@ -1,30 +1,17 @@
 
 
-import os,codecs
-# def genPathFile(directory):
-#     files = os.listdir(directory)
-#     allPath =[]
-#     for fileName  in files:
-#         allPath.append(os.path.join(directory,fileName))
-#     return allPath
+import codecs
 
-# rDir = "C:/Users/tinna/Downloads/ส่งให้ทีม partii-20201011T104156Z-001/ส่งให้ทีม partii/correct"
-# hDir = "C:/Users/tinna/Downloads/ส่งให้ทีม partii-20201011T104156Z-001/ส่งให้ทีม partii/raw/google"
-# rPath = genPathFile(rDir)
-# hPath = genPathFile(hDir)
-# with codecs.open("./output/tt.txt", 'w', encoding="utf-8") as file:
-#     text =""
-#     for p in rPath:
-#         text += p+"\n"
-#     text += "\n\n"
-#     for p in hPath:
-#         text += p+"\n"
-#     file.write(text)
+with codecs.open("C:/Users\Admin\Downloads\Express News ข้อความจริง.txt","r",encoding="utf-8") as f:
+    text  = f.readlines()
 
-vowel = ["่","้"]
-while(1):
-    v  = input("input : ")
-    if(v in vowel):
-        print("vowel")
+newText = ""
+for line in text:
+    line = line.strip()
+    if(line != ""):
+        newText += line+","+str(len(line))+"\n"
     else:
-        print("not vowel")
+        newText += "\n"
+    
+with codecs.open("C:/Users\Admin\Downloads\Express News ข้อความจริงพร้อมจำนวนอักขระ.txt","w",encoding="utf-8") as f:
+    f.write(newText)
