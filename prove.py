@@ -261,48 +261,58 @@ def writeHtml(provText, fileName):
             item.capitalize(), provText[item])
 
     substitutionBuffer = []
-    for i, listTage in enumerate(resultDict["textTag"]):
-        # 0 substitution
-        # 1 deletion
-        # 2 insertion
-        # 3 correction
-        if(listTage[0] != 0):
-            # for check befor if is subtitution do this condition
-            if(substitutionBuffer != []):
-                charCorrect = ''.join([str(elem[1])
-                                       for elem in substitutionBuffer])
-                charSub = ''.join([str(elem[0])
-                                   for elem in substitutionBuffer])
-                if(isMn(charCorrect[0])):
-                    charCorrect = "-"+charCorrect
-                if(isMn(charSub[0])):
-                    charSub = "-"+charSub
+    # for i, listTage in enumerate(resultDict["textTag"]):
+    #     # 0 substitution
+    #     # 1 deletion
+    #     # 2 insertion
+    #     # 3 correction
+    #     if(listTage[0] != 0):
+    #         # for check befor if is subtitution do this condition
+    #         if(substitutionBuffer != []):
+    #             charCorrect = ''.join([str(elem[1])
+    #                                    for elem in substitutionBuffer])
+    #             charSub = ''.join([str(elem[0])
+    #                                for elem in substitutionBuffer])
+    #             if(isMn(charCorrect[0])):
+    #                 charCorrect = "-"+charCorrect
+    #             if(isMn(charSub[0])):
+    #                 charSub = "-"+charSub
 
-                html += "<span class='{0}'>{1}({2})</span>".format(
-                    dictTage[0], charCorrect, charSub)
-                substitutionBuffer = []
+    #             html += "<span class='{0}'>{1}({2})</span>".format(
+    #                 dictTage[0], charCorrect, charSub)
+    #             substitutionBuffer = []
 
-            if(i >= 1):
-                # (เ)-้ or ดิ -> -ิ wrong
-                if((resultDict["textTag"][i-1][0] == 0 and isMn(listTage[1])) or (isMn(listTage[1]) and
-                                                                                  (resultDict["textTag"][i-1][0] != resultDict["textTag"][i-1][0]))):
-                    html += "<span class='{}'>-{}</span>".format(
-                        dictTage[listTage[0]], listTage[1])
+    #         if(i >= 1):
+    #             # (เ)-้ or ดิ -> -ิ wrong
+    #             if((resultDict["textTag"][i-1][0] == 0 and isMn(listTage[1])) or (isMn(listTage[1]) and
+    #                                                                               (resultDict["textTag"][i-1][0] != resultDict["textTag"][i-1][0]))):
+    #                 html += "<span class='{}'>-{}</span>".format(
+    #                     dictTage[listTage[0]], listTage[1])
 
-                elif (isMn(listTage[1]) and re.findall("[ก-ฮ]", listTage[1])):
-                    html += "<span class='{}'>-{}</span>".format(
-                        dictTage[listTage[0]], listTage[1])
-                else:
-                    html += "<span class='{}'>{}</span>".format(
-                        dictTage[listTage[0]], listTage[1])
-            else:
-                html += "<span class='{}'>{}</span>".format(
-                    dictTage[listTage[0]], listTage[1])
+    #             elif (isMn(listTage[1]) and re.findall("[ก-ฮ]", listTage[1])):
+    #                 html += "<span class='{}'>-{}</span>".format(
+    #                     dictTage[listTage[0]], listTage[1])
+    #             else:
+    #                 html += "<span class='{}'>{}</span>".format(
+    #                     dictTage[listTage[0]], listTage[1])
+    #         else:
+    #             html += "<span class='{}'>{}</span>".format(
+    #                 dictTage[listTage[0]], listTage[1])
 
+    #     else:
+    #         substitutionBuffer.append((listTage[1][0], listTage[1][1]))
+
+    for listTage in resultDict["textTag"]:
+        if(listTage[0] != 0 and listTage[0] != 1):
+            html += "<span class='{}'>{}</span>".format(
+                dictTage[listTage[0]], listTage[1])
+        elif(listTage[0] == 1):
+            html += "<span class='{}'>{}</span>".format(
+                dictTage[listTage[0]], listTage[1])
         else:
-            substitutionBuffer.append((listTage[1][0], listTage[1][1]))
-
-
+            html += "<span class='{0}'>{2}({1})</span>".format(
+                dictTage[listTage[0]], listTage[1][0], listTage[1][1])
+                
     html += """
     </body>
     </html>
@@ -319,6 +329,7 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
     # for string format [:num +1] because getChunk return index(index start with 0)
     indexReference = 0
     indexHypothesis = 0
+    hypothesisLength = len(h)
     chunkList = []
     substitution = 0
     deletion = 0
@@ -329,10 +340,12 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
     memoryOverload = False
     print("\nlength r :", len(r), "\nlength h :", len(h))
     textTag = []
-
+    progress = 0
     while(not textFinal):
         # print("-------------------------\n")
         # get chunk with operator
+        progress = indexHypothesis*100/hypothesisLength
+        print(">>> progress : {} %".format(progress))
         if(len(r[indexReference:indexReference+chunkSize+upChunkSize]) <= maxLength and
            len(h[indexHypothesis:indexHypothesis+chunkSize+upChunkSize]) <= maxLength):
             if((indexReference+chunkSize+upChunkSize >= len(r)) and (indexHypothesis+chunkSize+upChunkSize >= len(h))):
@@ -414,10 +427,12 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
         "chunkSize": chunkSize,
         "PID": os.getpid(),
         "memeryUse": memeryUse,
-        "chunkList": resultDict["chunkList"]
+        "chunkList": resultDict["chunkList"],
+        "commitCode":1235
     }
     if(createHtml):
         writeHtml(provText, fileName)
+        
     return provText
     # with codecs.open("./output/output_prove.json", 'w', encoding="utf-8") as file:
     #     file.write(str(json.dumps(provText, indent=4)))
@@ -441,13 +456,13 @@ if __name__ == "__main__":
                     allPath.append(os.path.join(directory, fileName))
         return allPath
     rDir = "C:/Users\Admin\Desktop\เทียบเฉลย/ไฟล์ทดสอบเพิ่มเติม/correct/"
-    hDir = "C:/Users\Admin\Desktop\เทียบเฉลย/ไฟล์ทดสอบเพิ่มเติม/raw"
-    rPath = genPathFile(rDir, "")[:2]
-    hPath = genPathFile(hDir, "")[:2]
+    hDir = "C:/Users\Admin\Desktop\เทียบเฉลย/ไฟล์ทดสอบเพิ่มเติม/raw/"
+    rPath = genPathFile(rDir, "3136")
+    hPath = genPathFile(hDir, "3136")
 
     threshold = 100
     # size = range(2000,3000)
-    size = [3000]
+    size = [10000]
     print(">>> size :", size)
 
     for j, path in enumerate(rPath):

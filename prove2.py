@@ -59,11 +59,12 @@ if __name__ == "__main__":
                     allPath.append(os.path.join(directory,fileName))
         return allPath
 
-    rDir = "C:/Users\Admin\Desktop\เทียบเฉลย\ไฟล์ทดสอบเพิ่มเติม/สำหรับ golang/corect/"
-    hDir = "C:/Users\Admin\Desktop\เทียบเฉลย\ไฟล์ทดสอบเพิ่มเติม/สำหรับ golang/raw/"
-
-    rPath = genPathFile(rDir,"3393" )
-    hPath = genPathFile(hDir,"3393")
+    # rDir = "C:/Users\Admin\Desktop\เทียบเฉลย\ไฟล์ทดสอบเพิ่มเติม/สำหรับ golang/corect/"
+    # hDir = "C:/Users\Admin\Desktop\เทียบเฉลย\ไฟล์ทดสอบเพิ่มเติม/สำหรับ golang/raw/"
+    rDir =""
+    hDir=""
+    rPath = genPathFile(rDir,"rTest" )
+    hPath = genPathFile(hDir,"hTest")
 
     threshold = 100
     # size = range(2000,3000)
@@ -71,7 +72,7 @@ if __name__ == "__main__":
     print(">>> size :",size)
     
     # service test
-    url = "http://127.0.0.1:5051/acc"
+    url = "http://127.0.0.1:5050/accuracy"
 
     for j,path in enumerate(rPath):
         for i,chunkSize in enumerate(size):
@@ -85,8 +86,8 @@ if __name__ == "__main__":
                 fileh = fileh.replace(" ","")
                 fileh = fileh.replace("\n","")
                 fileh = fileh.replace("\r","")
-
                 fileName = os.path.splitext(os.path.split(hPath[j])[1])[0]
+                print(">>> task file :",fileName)
             # resultProve = testRun(filer,fileh,rPath[j],hPath[j],chunkSize,threshold,fileName,createHtml=False)
             
             # send path file
