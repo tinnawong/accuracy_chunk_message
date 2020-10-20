@@ -261,57 +261,46 @@ def writeHtml(provText, fileName):
             item.capitalize(), provText[item])
 
     substitutionBuffer = []
-    # for i, listTage in enumerate(resultDict["textTag"]):
-    #     # 0 substitution
-    #     # 1 deletion
-    #     # 2 insertion
-    #     # 3 correction
-    #     if(listTage[0] != 0):
-    #         # for check befor if is subtitution do this condition
-    #         if(substitutionBuffer != []):
-    #             charCorrect = ''.join([str(elem[1])
-    #                                    for elem in substitutionBuffer])
-    #             charSub = ''.join([str(elem[0])
-    #                                for elem in substitutionBuffer])
-    #             if(isMn(charCorrect[0])):
-    #                 charCorrect = "-"+charCorrect
-    #             if(isMn(charSub[0])):
-    #                 charSub = "-"+charSub
+    for i, listTage in enumerate(resultDict["textTag"]):
+        # 0 substitution
+        # 1 deletion
+        # 2 insertion
+        # 3 correction
+        if(listTage[0] != 0):
+            # for check befor if is subtitution do this condition
+            if(substitutionBuffer != []):
+                charCorrect = ''.join([str(elem[1])
+                                       for elem in substitutionBuffer])
+                charSub = ''.join([str(elem[0])
+                                   for elem in substitutionBuffer])
+                if(isMn(charCorrect[0])):
+                    charCorrect = "-"+charCorrect
+                if(isMn(charSub[0])):
+                    charSub = "-"+charSub
 
-    #             html += "<span class='{0}'>{1}({2})</span>".format(
-    #                 dictTage[0], charCorrect, charSub)
-    #             substitutionBuffer = []
+                html += "<span class='{0}'>{1}({2})</span>".format(
+                    dictTage[0], charCorrect, charSub)
+                substitutionBuffer = []
 
-    #         if(i >= 1):
-    #             # (เ)-้ or ดิ -> -ิ wrong
-    #             if((resultDict["textTag"][i-1][0] == 0 and isMn(listTage[1])) or (isMn(listTage[1]) and
-    #                                                                               (resultDict["textTag"][i-1][0] != resultDict["textTag"][i-1][0]))):
-    #                 html += "<span class='{}'>-{}</span>".format(
-    #                     dictTage[listTage[0]], listTage[1])
+            if(i >= 1):
+                # (เ)-้ or ดิ -> -ิ wrong
+                if((resultDict["textTag"][i-1][0] == 0 and isMn(listTage[1])) or (isMn(listTage[1]) and
+                                                                                  (resultDict["textTag"][i-1][0] != resultDict["textTag"][i-1][0]))):
+                    html += "<span class='{}'>-{}</span>".format(
+                        dictTage[listTage[0]], listTage[1])
 
-    #             elif (isMn(listTage[1]) and re.findall("[ก-ฮ]", listTage[1])):
-    #                 html += "<span class='{}'>-{}</span>".format(
-    #                     dictTage[listTage[0]], listTage[1])
-    #             else:
-    #                 html += "<span class='{}'>{}</span>".format(
-    #                     dictTage[listTage[0]], listTage[1])
-    #         else:
-    #             html += "<span class='{}'>{}</span>".format(
-    #                 dictTage[listTage[0]], listTage[1])
+                elif (isMn(listTage[1]) and re.findall("[ก-ฮ]", listTage[1])):
+                    html += "<span class='{}'>-{}</span>".format(
+                        dictTage[listTage[0]], listTage[1])
+                else:
+                    html += "<span class='{}'>{}</span>".format(
+                        dictTage[listTage[0]], listTage[1])
+            else:
+                html += "<span class='{}'>{}</span>".format(
+                    dictTage[listTage[0]], listTage[1])
 
-    #     else:
-    #         substitutionBuffer.append((listTage[1][0], listTage[1][1]))
-
-    for listTage in resultDict["textTag"]:
-        if(listTage[0] != 0 and listTage[0] != 1):
-            html += "<span class='{}'>{}</span>".format(
-                dictTage[listTage[0]], listTage[1])
-        elif(listTage[0] == 1):
-            html += "<span class='{}'>{}</span>".format(
-                dictTage[listTage[0]], listTage[1])
         else:
-            html += "<span class='{0}'>{2}({1})</span>".format(
-                dictTage[listTage[0]], listTage[1][0], listTage[1][1])
+            substitutionBuffer.append((listTage[1][0], listTage[1][1]))
                 
     html += """
     </body>
