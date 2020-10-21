@@ -307,9 +307,9 @@ def writeHtml(provText, fileName):
     </html>
     """
     for i in range(1, 501, 1):
-        if(not os.path.isfile("output/{}[{}].html".format(fileName, i))):
+        if(not os.path.isfile("output/6th time/{}[{}].html".format(fileName, i))):
             break
-    with codecs.open("output/{}[{}].html".format(fileName, i), 'w', encoding="utf-8") as file:
+    with codecs.open("output/6th time/{}[{}].html".format(fileName, i), 'w', encoding="utf-8") as file:
         file.write(html)
 
 
@@ -347,16 +347,17 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
         else:
             memoryOverload = True
             break
-        # dataReturn = {"abstract": (substitution, deletion, insertion, correction), "textTag": textTag}
+
         print("last index :", lastIndex)
-        # not match or correct lower threshold
+
+        # not match or correct lowe than threshold
         if(lastIndex == [0, 0] and not textFinal):
             # If large jump (large upChunkSize) may to condition memoryOverload
             upChunkSize += 2000
             print(">>> up chunk size to %s" % upChunkSize)
             continue
 
-        # threshold ok
+        # over threshold
         else:
             upChunkSize = 0
             chunkList.append((r[indexReference:indexReference+lastIndex[0]+1],
@@ -410,13 +411,15 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
         "memeryUse": memeryUse,
         "commitCode":12345
     }
+    if(provText["deletion"]+provText["substitution"]+provText["correction"] != provText["referenceLength"]):
+        print("\n\nError deletion + substitution + correction != referenceLength\n")
+    if(provText["insertion"]+provText["substitution"]+provText["correction"] != provText["hypothesisLength"]):
+        print("\n\nError insertion + substitution + correction != hypothesisLength\n")
+
     if(createHtml):
         writeHtml(provText, fileName)
 
     return provText
-    # with codecs.open("./output/output_prove.json", 'w', encoding="utf-8") as file:
-    #     file.write(str(json.dumps(provText, indent=4)))
-
 
 if __name__ == "__main__":
 
@@ -459,6 +462,8 @@ if __name__ == "__main__":
                 fileh = fileh.replace("\r", "")
 
                 fileName = os.path.splitext(os.path.split(hPath[j])[1])[0]
+                
+            print(">>> task file :",fileName," && ",os.path.splitext(os.path.split(rPath[j])[1])[0])
             dataTest = testRun(
                 filer, fileh, rPath[j], hPath[j], chunkSize, threshold, fileName)
 
