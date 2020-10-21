@@ -10,7 +10,6 @@ if __name__ == "__main__":
     import psutil
     import codecs
     import requests
-    import requests_cache
     # 0 substitution
     # 1 deletion
     # 2 insertion
@@ -39,13 +38,13 @@ if __name__ == "__main__":
                 }
                 </style>
             </head>
-            <body></html>
+            <body>
         """
         for item in response:
             html += str(item)+":"+str(response[item])+"<br>"
 
-        html+="/body"
-        with codecs.open("./output/5th golang/{}.html".format(fileName), 'w', encoding="utf-8") as file:
+        html+="</body></html>"
+        with codecs.open("./output/{}.html".format(fileName), 'w', encoding="utf-8") as file:
             file.write(html)
 
     def genPathFile(directory,keyFile=None):
@@ -61,8 +60,8 @@ if __name__ == "__main__":
 
     # rDir = "C:/Users\Admin\Desktop\เทียบเฉลย\ไฟล์ทดสอบเพิ่มเติม/สำหรับ golang/corect/"
     # hDir = "C:/Users\Admin\Desktop\เทียบเฉลย\ไฟล์ทดสอบเพิ่มเติม/สำหรับ golang/raw/"
-    rDir =""
-    hDir=""
+    rDir ="E:/python\prove-WER-method"
+    hDir="E:/python\prove-WER-method"
     rPath = genPathFile(rDir,"rTest" )
     hPath = genPathFile(hDir,"hTest")
 
