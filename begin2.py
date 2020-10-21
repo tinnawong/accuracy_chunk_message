@@ -27,7 +27,7 @@ from WER_ import get_word_error_rate
 #         return 0
 
 import json
-from prove import writeHtml
+from prove import writeHtml 
 with codecs.open("output/3136[0].json",'r',encoding="utf-8") as file:
         r = file.read()
         result = json.loads(r)

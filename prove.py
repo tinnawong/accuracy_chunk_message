@@ -199,7 +199,7 @@ def findLastIndex2(r, h, dimensions, threshold, textFinal):
 
 
 def getChunk(r, h, threshold, textFinal):
-    print(">>> getChunk funtion")
+    print(">>> getChunk funtion is final:",textFinal)
     dimensions = generateMatrix(r, h)
     lastIndex = findLastIndex2(r, h, dimensions, threshold, textFinal)
 
@@ -301,7 +301,7 @@ def writeHtml(provText, fileName):
 
         else:
             substitutionBuffer.append((listTage[1][0], listTage[1][1]))
-    
+                
     html += """
     </body>
     </html>
@@ -347,24 +347,17 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
         else:
             memoryOverload = True
             break
-        # dataReturn = {"abstract": (substitution, deletion, insertion, correction), "textTag": textTag}
-        print("last index :", lastIndex)
-        # not match or correct lower threshold
-        if(lastIndex == [0, 0] and not textFinal):
-            # check last char in ref and hyp
-            if(((indexReference+chunkSize >= len(r)-1) or (indexHypothesis+chunkSize >= len(h)-1)) and
-               (len(r[indexReference:]) <= maxLength) and len(h[indexHypothesis:]) <= maxLength):
-                indexReference += len(r[indexReference:])-1
-                indexHypothesis += len(h[indexHypothesis:])-1
-                chunkList.append(
-                    (r[indexReference:], h[indexHypothesis:], resultChunk["abstract"]))
-            else:
-                # If large jump (large upChunkSize) may to condition memoryOverload
-                upChunkSize += 2000
-                continue
-                # print(">>> up chunk size to %s" % upChunkSize)
 
-        # threshold ok
+        print("last index :", lastIndex)
+
+        # not match or correct lowe than threshold
+        if(lastIndex == [0, 0] and not textFinal):
+            # If large jump (large upChunkSize) may to condition memoryOverload
+            upChunkSize += 2000
+            print(">>> up chunk size to %s" % upChunkSize)
+            continue
+
+        # over threshold
         else:
             upChunkSize = 0
             chunkList.append((r[indexReference:indexReference+lastIndex[0]+1],
@@ -416,16 +409,17 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
         "chunkSize": chunkSize,
         "PID": os.getpid(),
         "memeryUse": memeryUse,
-        "chunkList": resultDict["chunkList"],
-        "commitCode":1235
+        "commitCode":12345
     }
+    if(provText["deletion"]+provText["substitution"]+provText["correction"] != provText["referenceLength"]):
+        print("\n\nError deletion + substitution + correction != referenceLength\n")
+    if(provText["insertion"]+provText["substitution"]+provText["correction"] != provText["hypothesisLength"]):
+        print("\n\nError insertion + substitution + correction != hypothesisLength\n")
+
     if(createHtml):
         writeHtml(provText, fileName)
-        
-    return provText
-    # with codecs.open("./output/output_prove.json", 'w', encoding="utf-8") as file:
-    #     file.write(str(json.dumps(provText, indent=4)))
 
+    return provText
 
 if __name__ == "__main__":
 
@@ -444,14 +438,14 @@ if __name__ == "__main__":
                 if(keyFile in fileName):
                     allPath.append(os.path.join(directory, fileName))
         return allPath
-    rDir = "C:/Users\Admin\Desktop\เทียบเฉลย/ไฟล์ทดสอบเพิ่มเติม/correct/"
-    hDir = "C:/Users\Admin\Desktop\เทียบเฉลย/ไฟล์ทดสอบเพิ่มเติม/raw/"
-    rPath = genPathFile(rDir, "3136")
-    hPath = genPathFile(hDir, "3136")
+    rDir = "C:/Users\Admin\Desktop\เทียบเฉลย/ไฟล์ทดสอบเพิ่มเติม/"
+    hDir = "C:/Users\Admin\Desktop\เทียบเฉลย/ไฟล์ทดสอบเพิ่มเติม/"
+    rPath = genPathFile(rDir, "3136_approved -fix")
+    hPath = genPathFile(hDir, "3136 fix")
 
     threshold = 100
     # size = range(2000,3000)
-    size = [10000]
+    size = [5000]
     print(">>> size :", size)
 
     for j, path in enumerate(rPath):
@@ -468,6 +462,8 @@ if __name__ == "__main__":
                 fileh = fileh.replace("\r", "")
 
                 fileName = os.path.splitext(os.path.split(hPath[j])[1])[0]
+                
+            print(">>> task file :",fileName," && ",os.path.splitext(os.path.split(rPath[j])[1])[0])
             dataTest = testRun(
                 filer, fileh, rPath[j], hPath[j], chunkSize, threshold, fileName)
 
