@@ -199,7 +199,7 @@ def findLastIndex2(r, h, dimensions, threshold, textFinal):
 
 
 def getChunk(r, h, threshold, textFinal):
-    print(">>> getChunk funtion is final:",textFinal)
+    print(">>> getChunk funtion is final:", textFinal)
     dimensions = generateMatrix(r, h)
     lastIndex = findLastIndex2(r, h, dimensions, threshold, textFinal)
 
@@ -301,7 +301,7 @@ def writeHtml(provText, fileName):
 
         else:
             substitutionBuffer.append((listTage[1][0], listTage[1][1]))
-                
+
     html += """
     </body>
     </html>
@@ -382,12 +382,12 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
 
 def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True):
     maxLength = 20000
+    print(">>> PID :",os.getpid())
     process = psutil.Process(os.getpid())
     startTime = time.time()
     resultDict = measureByWER(r, h, threshold, chunkSize, maxLength)
     endTime = time.time()
 
-    memeryUse = process.memory_info().rss*0.000001
     provText = {
         "pathFileNameRef": rPath,
         "pathFileNameHyp": hPath,
@@ -407,9 +407,13 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
         "maxLength": maxLength,
         "threshold": threshold,
         "chunkSize": chunkSize,
-        "PID": os.getpid(),
-        "memeryUse": memeryUse,
-        "commitCode":12345
+        "processor": {"platform":"",
+                      "RAM":"",
+                      "":"",
+                      "":"",
+                      "":"",
+                      "":""},
+        "commitCode": 12345
     }
     if(provText["deletion"]+provText["substitution"]+provText["correction"] != provText["referenceLength"]):
         print("\n\nError deletion + substitution + correction != referenceLength\n")
@@ -420,6 +424,7 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
         writeHtml(provText, fileName)
 
     return provText
+
 
 if __name__ == "__main__":
 
@@ -432,16 +437,19 @@ if __name__ == "__main__":
         files = os.listdir(directory)
         allPath = []
         for fileName in files:
-            if(not keyFile):
-                allPath.append(os.path.join(directory, fileName))
-            else:
-                if(keyFile in fileName):
-                    allPath.append(os.path.join(directory, fileName))
+            newPath = os.path.join(directory, fileName)
+            if(os.path.isfile(newPath)):
+                if(not keyFile):
+                    allPath.append(newPath)
+                else:
+                    if(keyFile in fileName):
+                        allPath.append(newPath)
         return allPath
-    rDir = "C:/Users\Admin\Desktop\เทียบเฉลย/ไฟล์ทดสอบเพิ่มเติม/"
-    hDir = "C:/Users\Admin\Desktop\เทียบเฉลย/ไฟล์ทดสอบเพิ่มเติม/"
-    rPath = genPathFile(rDir, "3136_approved -fix")
-    hPath = genPathFile(hDir, "3136 fix")
+
+    rDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/correct test/"
+    hDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/raw test/"
+    rPath = genPathFile(rDir, "25k")
+    hPath = genPathFile(hDir, "25k")
 
     threshold = 100
     # size = range(2000,3000)
@@ -462,8 +470,9 @@ if __name__ == "__main__":
                 fileh = fileh.replace("\r", "")
 
                 fileName = os.path.splitext(os.path.split(hPath[j])[1])[0]
-                
-            print(">>> task file :",fileName," && ",os.path.splitext(os.path.split(rPath[j])[1])[0])
+
+            print(">>> task file :", fileName, " && ",
+                  os.path.splitext(os.path.split(rPath[j])[1])[0])
             dataTest = testRun(
                 filer, fileh, rPath[j], hPath[j], chunkSize, threshold, fileName)
 

@@ -2,7 +2,7 @@
 
 if __name__ == "__main__":
     # for check opertor between prove version and current version
-    from prove import testRun,writeHtml
+    from prove import testRun,writeHtml,genPathFile
     import os
     import psutil
     import time
@@ -46,18 +46,7 @@ if __name__ == "__main__":
         html+="</body></html>"
         with codecs.open("./output/{}.html".format(fileName), 'w', encoding="utf-8") as file:
             file.write(html)
-
-    def genPathFile(directory,keyFile=None):
-        files = os.listdir(directory)
-        allPath =[]
-        for fileName  in files:
-            if(not keyFile):
-                allPath.append(os.path.join(directory,fileName))
-            else:
-                if(keyFile in fileName):
-                    allPath.append(os.path.join(directory,fileName))
-        return allPath
-
+            
     # rDir = "C:/Users\Admin\Desktop\เทียบเฉลย\ไฟล์ทดสอบเพิ่มเติม/สำหรับ golang/corect/"
     # hDir = "C:/Users\Admin\Desktop\เทียบเฉลย\ไฟล์ทดสอบเพิ่มเติม/สำหรับ golang/raw/"
     rDir ="E:/python\prove-WER-method"
