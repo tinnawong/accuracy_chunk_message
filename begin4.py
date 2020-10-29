@@ -1,23 +1,27 @@
+import codecs,json
+import matplotlib.pyplot as plt
+
+with codecs.open("output/monitor_25kb 3889 test.json",'r',encoding="utf-8") as file:
+    data = file.read()
+    jsonData = json.loads(data)
+monitor = jsonData["monitor"]
+
+pyCPU = [x["psutil_cpu_percent"] for x in monitor]
+pyMemory  = [x["psutil_virtual_memory"]["percent"] for x in monitor]
+
+# กำหนดค่าของ x และ y ที่จะใช้
+x = range(0,len(monitor)*2,2)
+plt.xlabel('time(s)')   #แกน x พร้อมตั้งชื่อในวงเล็บ
+plt.ylabel('percent(%)')   #แกน y พร้อมตั้งชื่อในวงเล็บ
+plt.plot(x,pyCPU) # คำสั่งวาดกราฟ
+plt.plot(x,pyMemory) # คำสั่งวาดกราฟ
+# plt.show() # คำสั่งให้แสดง
 
 
-import psutil,time,sys,os
-
-# you can convert that object to a dictionary 
-print("ram :",dict(psutil.virtual_memory()._asdict()))
-# you can have the percentage of used RAM
-print("swap memory :",psutil.swap_memory()._asdict())
-
-
-while(1):
-    p = psutil.Process(13664) 
-    print("memory usage :",p.memory_info()._asdict())
-    print("cpu :",p.cpu_percent())
-    with p.oneshot():
-        print(p.name())  # execute internal routine once collecting multiple info
-        print(p.cpu_times())  # return cached value
-        print(p.cpu_percent())  # return cached value
-        print(p.create_time() ) # return cached value
-        print(p.ppid())  # return cached value
-        print(p.status())  # return cached value
-    time.sleep(1)
-    
+ax = plt.gca()
+ax.set_title(u'Monitor CPU & RAM',fontname='Tahoma',fontsize=13)
+# ax.plot(x,take,'-om')
+# ax.plot(x,ono,'-oc')
+# ax.plot(x,fuku,'-oy')
+ax.legend([u'CPU',u'Memory'])
+plt.show()

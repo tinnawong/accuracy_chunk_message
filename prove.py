@@ -15,6 +15,9 @@ import psutil
 import time
 import json
 from unicategories import unicodedata
+from multiprocessing import Process
+import platform
+
 # reference(r) to the hypothesis(h)
 
 
@@ -309,7 +312,7 @@ def writeHtml(provText, fileName):
     for i in range(1, 501, 1):
         if(not os.path.isfile("output/{}[{}].html".format(fileName, i))):
             break
-    with codecs.open("output/{}[{}].html".format(fileName, i), 'w', encoding="utf-8") as file:
+    with codecs.open("output/8 th partii grpc/{}[{}].html".format(fileName, i), 'w', encoding="utf-8") as file:
         file.write(html)
 
 
@@ -383,6 +386,9 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
 def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True):
     maxLength = 20000
     print(">>> PID :",os.getpid())
+    with codecs.open("output\pid.txt",'w',encoding="utf-8") as f:
+        f.write(str(os.getpid()))
+
     process = psutil.Process(os.getpid())
     startTime = time.time()
     resultDict = measureByWER(r, h, threshold, chunkSize, maxLength)
@@ -420,10 +426,87 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
     if(provText["insertion"]+provText["substitution"]+provText["correction"] != provText["hypothesisLength"]):
         print("\n\nError insertion + substitution + correction != hypothesisLength\n")
 
-    if(createHtml):
+    if(1):
         writeHtml(provText, fileName)
 
+    with codecs.open("./output/8 th partii grpc/{}.json".format(fileName), 'w', encoding="utf-8") as file:
+            file.write(json.dumps(provText, indent=4, ensure_ascii=False))
+
     return provText
+
+def normalizeText(text):
+    text = text.lower()
+    text = text.replace(" ", "")
+    text = text.replace("\n", "")
+    text = text.replace("\r", "")
+    return text
+
+
+def logProcess(fileName):
+    log = {}
+    i = 0
+    # print("ram :", dict(psutil.virtual_memory()._asdict()))
+    # print("swap memory :", psutil.swap_memory()._asdict())
+
+    log["platformTest"] = platform.platform()
+    log["architecture"] = platform.architecture()
+    log["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
+    log["psutil_swap_memory"] = psutil.swap_memory()._asdict()
+    log["monitor"] = []
+
+    pidBegin = False
+    while(1):
+        try:
+            if(not pidBegin):
+                with codecs.open("output\pid.txt",'r',encoding="utf-8") as f:
+                    pid = int(f.read().strip())
+            
+            logTime = {}
+
+            if(pid not in psutil.pids()):
+                if(pidBegin):
+                    break
+                print(">>> wait measure process")
+                logTime["psutil_cpu_percent"] = psutil.cpu_percent()
+                logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
+                time.sleep(1)
+            else:
+                print(">>> log cpu work and ram work")
+                p = psutil.Process(pid)
+                pidBegin = True
+                # print("<< ------------------------------------------------------------")
+                logTime["psutil_cpu_percent"] = psutil.cpu_percent()
+                logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
+                # print(psutil.cpu_percent())
+                # print(psutil.virtual_memory()._asdict())
+
+                # print("------------------------------------------------------------")
+                subTimeProcess = {}
+                with p.oneshot():
+                    subTimeProcess["ppid"] = time.time()
+                    subTimeProcess["ppid"] = p.ppid()
+                    subTimeProcess["pid"] = p.pid
+                    subTimeProcess["memory_percent"] = p.memory_percent()
+                    subTimeProcess["memory_full_info"] = p.memory_full_info(
+                    )._asdict()
+                    logTime["process"] = subTimeProcess
+                    del subTimeProcess
+
+                    # print("memory usage :", p.memory_percent())
+                    # print("memory usage :", p.memory_full_info()._asdict())
+                    print(">>> ppid :", p.ppid())
+                    print(">>> pid :", p.pid)
+
+                # print("--------------------------------------------------------------\n\n")
+                # time.sleep(1)
+                i += 1
+                time.sleep(2)
+            log["monitor"].append(logTime)
+        except Exception as e:
+            print(e,"in function logProcess")
+    with codecs.open("output/8 th partii grpc/monitor_{}.json".format(fileName), "w", encoding="utf-8") as f:
+        f.write(json.dumps(log, indent=4, ensure_ascii=False))
+    return log
 
 
 if __name__ == "__main__":
@@ -446,10 +529,10 @@ if __name__ == "__main__":
                         allPath.append(newPath)
         return allPath
 
-    rDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/correct test/"
-    hDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/raw test/"
-    rPath = genPathFile(rDir, "25k")
-    hPath = genPathFile(hDir, "25k")
+    rDir = "T:/Shared drives\งานบริษัท\เทียบเฉลย accuracy\ส่งให้ partii\correct"
+    hDir = "E:/golang\partii_grpc\cmd\output"
+    rPath = genPathFile(rDir, "พยากร")
+    hPath = genPathFile(hDir, "พยากร")
 
     threshold = 100
     # size = range(2000,3000)
@@ -459,25 +542,33 @@ if __name__ == "__main__":
     for j, path in enumerate(rPath):
         for i, chunkSize in enumerate(size):
             with codecs.open(rPath[j], 'r', encoding="utf-8") as file:
-                filer = file.read().lower()
-                filer = filer.replace(" ", "")
-                filer = filer.replace("\n", "")
-                filer = filer.replace("\r", "")
+                filer = file.read()
+                filer = normalizeText(filer)
+             
             with codecs.open(hPath[j], 'r', encoding="utf-8") as file:
-                fileh = file.read().lower()
-                fileh = fileh.replace(" ", "")
-                fileh = fileh.replace("\n", "")
-                fileh = fileh.replace("\r", "")
-
+                fileh = file.read()
+                fileh = normalizeText(fileh)            
                 fileName = os.path.splitext(os.path.split(hPath[j])[1])[0]
 
             print(">>> task file :", fileName, " && ",
                   os.path.splitext(os.path.split(rPath[j])[1])[0])
-            dataTest = testRun(
-                filer, fileh, rPath[j], hPath[j], chunkSize, threshold, fileName)
+            # dataTest = testRun(filer, fileh, rPath[j], hPath[j], chunkSize, threshold, fileName)
 
-        with codecs.open("./output/{}[{}].json".format(fileName, j), 'w', encoding="utf-8") as file:
-            file.write(json.dumps(dataTest, indent=4, ensure_ascii=False))
+            procs = []
+
+            p2 = Process(target=logProcess,args=(fileName,))    
+            p2.start()
+            procs.append(p2)
+            time.sleep(5)
+            p1 = Process(target=testRun, args=(filer, fileh, rPath[j], hPath[j], chunkSize, threshold, fileName))
+            p1.start()
+            procs.append(p1)
+            for p in procs:
+                p.join()
+              
+
+        # with codecs.open("./output/{}[{}].json".format(fileName, j), 'w', encoding="utf-8") as file:
+        #     file.write(json.dumps(dataTest, indent=4, ensure_ascii=False))
 
     def finished():
         import winsound
