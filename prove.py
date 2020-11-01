@@ -221,7 +221,7 @@ def isMn(aChar):
         return 0
 
 
-def writeHtml(provText, fileName):
+def writeHtml(provText, fileName,pathOutput):
 
     resultDict = provText['resultDict']
     html = """
@@ -312,7 +312,7 @@ def writeHtml(provText, fileName):
     for i in range(1, 501, 1):
         if(not os.path.isfile("output/{}[{}].html".format(fileName, i))):
             break
-    with codecs.open("output/8 th partii grpc/{}[{}].html".format(fileName, i), 'w', encoding="utf-8") as file:
+    with codecs.open(os.path.join(pathOutput,"{}[{}].html".format(fileName, i)), 'w', encoding="utf-8") as file:
         file.write(html)
 
 
@@ -427,9 +427,9 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
         print("\n\nError insertion + substitution + correction != hypothesisLength\n")
 
     if(1):
-        writeHtml(provText, fileName)
+        writeHtml(provText, fileName,"output")
 
-    with codecs.open("./output/8 th partii grpc/{}.json".format(fileName), 'w', encoding="utf-8") as file:
+    with codecs.open("./output/{}.json".format(fileName), 'w', encoding="utf-8") as file:
             file.write(json.dumps(provText, indent=4, ensure_ascii=False))
 
     return provText
@@ -442,7 +442,7 @@ def normalizeText(text):
     return text
 
 
-def logProcess(fileName):
+def logProcess(fileName,pathOutput):
     log = {}
     i = 0
     # print("ram :", dict(psutil.virtual_memory()._asdict()))
@@ -465,8 +465,14 @@ def logProcess(fileName):
 
             if(pid not in psutil.pids()):
                 if(pidBegin):
+                    for i in range(10):
+                        print(">>> log CPU and RAM")
+                        logTime["psutil_cpu_percent"] = psutil.cpu_percent()
+                        logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
+                        log["monitor"].append(logTime)
+                        time.sleep(1)
                     break
-                print(">>> wait measure process")
+                print(">>> log CPU and RAM")
                 logTime["psutil_cpu_percent"] = psutil.cpu_percent()
                 logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
                 time.sleep(1)
@@ -474,13 +480,9 @@ def logProcess(fileName):
                 print(">>> log cpu work and ram work")
                 p = psutil.Process(pid)
                 pidBegin = True
-                # print("<< ------------------------------------------------------------")
                 logTime["psutil_cpu_percent"] = psutil.cpu_percent()
                 logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
-                # print(psutil.cpu_percent())
-                # print(psutil.virtual_memory()._asdict())
 
-                # print("------------------------------------------------------------")
                 subTimeProcess = {}
                 with p.oneshot():
                     subTimeProcess["ppid"] = time.time()
@@ -491,20 +493,14 @@ def logProcess(fileName):
                     )._asdict()
                     logTime["process"] = subTimeProcess
                     del subTimeProcess
-
-                    # print("memory usage :", p.memory_percent())
-                    # print("memory usage :", p.memory_full_info()._asdict())
-                    print(">>> ppid :", p.ppid())
-                    print(">>> pid :", p.pid)
-
-                # print("--------------------------------------------------------------\n\n")
-                # time.sleep(1)
+                    # print(">>> ppid :", p.ppid())
+                    # print(">>> pid :", p.pid)
                 i += 1
-                time.sleep(2)
+                time.sleep(1)
             log["monitor"].append(logTime)
         except Exception as e:
             print(e,"in function logProcess")
-    with codecs.open("output/8 th partii grpc/monitor_{}.json".format(fileName), "w", encoding="utf-8") as f:
+    with codecs.open(os.path.join(pathOutput,"monitor_{}.json".format(fileName)), "w", encoding="utf-8") as f:
         f.write(json.dumps(log, indent=4, ensure_ascii=False))
     return log
 
@@ -530,7 +526,7 @@ if __name__ == "__main__":
         return allPath
 
     rDir = "T:/Shared drives\งานบริษัท\เทียบเฉลย accuracy\ส่งให้ partii\correct"
-    hDir = "E:/golang\partii_grpc\cmd\output"
+    hDir = "T:/Shared drives\งานบริษัท\เทียบเฉลย accuracy\ส่งให้ partii/raw/google"
     rPath = genPathFile(rDir, "พยากร")
     hPath = genPathFile(hDir, "พยากร")
 
@@ -556,10 +552,10 @@ if __name__ == "__main__":
 
             procs = []
 
-            p2 = Process(target=logProcess,args=(fileName,))    
+            p2 = Process(target=logProcess,args=(fileName,"output"))    
             p2.start()
             procs.append(p2)
-            time.sleep(5)
+            time.sleep(10)
             p1 = Process(target=testRun, args=(filer, fileh, rPath[j], hPath[j], chunkSize, threshold, fileName))
             p1.start()
             procs.append(p1)

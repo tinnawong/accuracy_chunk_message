@@ -1,20 +1,26 @@
 import codecs,json
 import matplotlib.pyplot as plt
 
-with codecs.open("output/monitor_25kb 3889 test.json",'r',encoding="utf-8") as file:
+with codecs.open("output/monitor_NEWS_พยากรณ์อากาศ.json",'r',encoding="utf-8") as file:
     data = file.read()
     jsonData = json.loads(data)
 monitor = jsonData["monitor"]
 
-pyCPU = [x["psutil_cpu_percent"] for x in monitor]
+bePyCPU = [x["psutil_cpu_percent"] for x in monitor[:10]]
+bexPyCPU = [x for x in range(10)]
+pyCPU = [x["psutil_cpu_percent"] for x in monitor[9:len(monitor)-10]]
+xPyCPU = [x for x in range(9,len(monitor)-10)]
+
 pyMemory  = [x["psutil_virtual_memory"]["percent"] for x in monitor]
 
+
 # กำหนดค่าของ x และ y ที่จะใช้
-x = range(0,len(monitor)*2,2)
+x = range(0,len(monitor),1)
 plt.xlabel('time(s)')   #แกน x พร้อมตั้งชื่อในวงเล็บ
 plt.ylabel('percent(%)')   #แกน y พร้อมตั้งชื่อในวงเล็บ
-plt.plot(x,pyCPU) # คำสั่งวาดกราฟ
+plt.plot(xPyCPU,pyCPU) # คำสั่งวาดกราฟ
 plt.plot(x,pyMemory) # คำสั่งวาดกราฟ
+plt.plot(bexPyCPU,bePyCPU)
 # plt.show() # คำสั่งให้แสดง
 
 
