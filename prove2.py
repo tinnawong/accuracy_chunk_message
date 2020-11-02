@@ -127,3 +127,4 @@ if __name__ == "__main__":
             winsound.Beep(freq, duration)
             duration -= 100
     finished()
+

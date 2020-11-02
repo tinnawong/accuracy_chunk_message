@@ -1,12 +1,3 @@
-"""
-
-@author Kiettiphong Manovisut
-
-References:
-https://en.wikipedia.org/wiki/Word_error_rate
-https://www.github.com/mission-peace/interview/wiki
-
-"""
 import numpy
 import codecs
 import re
@@ -17,7 +8,7 @@ import json
 from unicategories import unicodedata
 from multiprocessing import Process
 import platform
-
+import git
 # reference(r) to the hypothesis(h)
 
 
@@ -211,8 +202,9 @@ def getChunk(r, h, threshold, textFinal):
 
 def isMn(aChar):
     cc = u'{}'.format(aChar)
+    charManage = ["ำ"]
     try:
-        if(unicodedata.category(cc) == "Mn"):
+        if(unicodedata.category(cc) == "Mn" or aChar in charManage):
             return 1
         else:
             return 0
@@ -221,7 +213,7 @@ def isMn(aChar):
         return 0
 
 
-def writeHtml(provText, fileName,pathOutput):
+def writeHtml(provText, fileName, pathOutput):
 
     resultDict = provText['resultDict']
     html = """
@@ -312,7 +304,7 @@ def writeHtml(provText, fileName,pathOutput):
     for i in range(1, 501, 1):
         if(not os.path.isfile("output/{}[{}].html".format(fileName, i))):
             break
-    with codecs.open(os.path.join(pathOutput,"{}[{}].html".format(fileName, i)), 'w', encoding="utf-8") as file:
+    with codecs.open(os.path.join(pathOutput, "{}[{}].html".format(fileName, i)), 'w', encoding="utf-8") as file:
         file.write(html)
 
 
@@ -385,14 +377,17 @@ def measureByWER(r, h, threshold, chunkSize, maxLength):
 
 def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True):
     maxLength = 20000
-    print(">>> PID :",os.getpid())
-    with codecs.open("output\pid.txt",'w',encoding="utf-8") as f:
+    print(">>> PID :", os.getpid())
+    with codecs.open("output\pid.txt", 'w', encoding="utf-8") as f:
         f.write(str(os.getpid()))
 
     process = psutil.Process(os.getpid())
     startTime = time.time()
     resultDict = measureByWER(r, h, threshold, chunkSize, maxLength)
     endTime = time.time()
+
+    repo = git.Repo(search_parent_directories=True)
+    sha = repo.head.object.hexsha
 
     provText = {
         "pathFileNameRef": rPath,
@@ -413,13 +408,13 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
         "maxLength": maxLength,
         "threshold": threshold,
         "chunkSize": chunkSize,
-        "processor": {"platform":"",
-                      "RAM":"",
-                      "":"",
-                      "":"",
-                      "":"",
-                      "":""},
-        "commitCode": 12345
+        # "processor": {"platform":"",
+        #               "RAM":"",
+        #               "":"",
+        #               "":"",
+        #               "":"",
+        #               "":""},
+        "commitCode": sha
     }
     if(provText["deletion"]+provText["substitution"]+provText["correction"] != provText["referenceLength"]):
         print("\n\nError deletion + substitution + correction != referenceLength\n")
@@ -427,12 +422,13 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
         print("\n\nError insertion + substitution + correction != hypothesisLength\n")
 
     if(1):
-        writeHtml(provText, fileName,"output")
+        writeHtml(provText, fileName, "output")
 
     with codecs.open("./output/{}.json".format(fileName), 'w', encoding="utf-8") as file:
-            file.write(json.dumps(provText, indent=4, ensure_ascii=False))
+        file.write(json.dumps(provText, indent=4, ensure_ascii=False))
 
     return provText
+
 
 def normalizeText(text):
     text = text.lower()
@@ -442,7 +438,7 @@ def normalizeText(text):
     return text
 
 
-def logProcess(fileName,pathOutput):
+def logProcess(fileName, pathOutput):
     log = {}
     i = 0
     # print("ram :", dict(psutil.virtual_memory()._asdict()))
@@ -458,9 +454,8 @@ def logProcess(fileName,pathOutput):
     while(1):
         try:
             if(not pidBegin):
-                with codecs.open("output\pid.txt",'r',encoding="utf-8") as f:
+                with codecs.open("output\pid.txt", 'r', encoding="utf-8") as f:
                     pid = int(f.read().strip())
-            
             logTime = {}
 
             if(pid not in psutil.pids()):
@@ -468,7 +463,8 @@ def logProcess(fileName,pathOutput):
                     for i in range(10):
                         print(">>> log CPU and RAM")
                         logTime["psutil_cpu_percent"] = psutil.cpu_percent()
-                        logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
+                        logTime["psutil_virtual_memory"] = psutil.virtual_memory(
+                        )._asdict()
                         log["monitor"].append(logTime)
                         time.sleep(1)
                     break
@@ -499,20 +495,23 @@ def logProcess(fileName,pathOutput):
                 time.sleep(1)
             log["monitor"].append(logTime)
         except Exception as e:
-            print(e,"in function logProcess")
-    with codecs.open(os.path.join(pathOutput,"monitor_{}.json".format(fileName)), "w", encoding="utf-8") as f:
+            print(e, "in function logProcess")
+    with codecs.open(os.path.join(pathOutput, "{}_monitor.json".format(fileName)), "w", encoding="utf-8") as f:
         f.write(json.dumps(log, indent=4, ensure_ascii=False))
     return log
 
 
-if __name__ == "__main__":
-
-    # 0 substitution
-    # 1 deletion
-    # 2 insertion
-    # 3 correction
-
-    def genPathFile(directory, keyFile=None):
+def genPathFile(directory, keyFile=None):
+    
+    if(os.path.isfile(directory) ):
+        print(os.path.splitext(directory)[1])
+        fileSupport = [".txt"]
+        if(os.path.splitext(directory)[1] in fileSupport):
+            return [directory]
+        else:
+            print(">>> file not support")
+            return []
+    else:
         files = os.listdir(directory)
         allPath = []
         for fileName in files:
@@ -525,10 +524,18 @@ if __name__ == "__main__":
                         allPath.append(newPath)
         return allPath
 
-    rDir = "T:/Shared drives\งานบริษัท\เทียบเฉลย accuracy\ส่งให้ partii\correct"
-    hDir = "T:/Shared drives\งานบริษัท\เทียบเฉลย accuracy\ส่งให้ partii/raw/google"
-    rPath = genPathFile(rDir, "พยากร")
-    hPath = genPathFile(hDir, "พยากร")
+
+if __name__ == "__main__":
+
+    # 0 substitution
+    # 1 deletion
+    # 2 insertion
+    # 3 correction
+
+    rDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/correct test/10kb 3911_240863 พาณิชย์อิเล็กทรอนิกส์ (ปี 3).txt"
+    hDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/raw test/10kb 3911 test.txt"
+    rPath = genPathFile(rDir, "")
+    hPath = genPathFile(hDir, "")
 
     threshold = 100
     # size = range(2000,3000)
@@ -540,10 +547,10 @@ if __name__ == "__main__":
             with codecs.open(rPath[j], 'r', encoding="utf-8") as file:
                 filer = file.read()
                 filer = normalizeText(filer)
-             
+
             with codecs.open(hPath[j], 'r', encoding="utf-8") as file:
                 fileh = file.read()
-                fileh = normalizeText(fileh)            
+                fileh = normalizeText(fileh)
                 fileName = os.path.splitext(os.path.split(hPath[j])[1])[0]
 
             print(">>> task file :", fileName, " && ",
@@ -552,16 +559,16 @@ if __name__ == "__main__":
 
             procs = []
 
-            p2 = Process(target=logProcess,args=(fileName,"output"))    
+            p2 = Process(target=logProcess, args=(fileName, "output"))
             p2.start()
             procs.append(p2)
             time.sleep(10)
-            p1 = Process(target=testRun, args=(filer, fileh, rPath[j], hPath[j], chunkSize, threshold, fileName))
+            p1 = Process(target=testRun, args=(
+                filer, fileh, rPath[j], hPath[j], chunkSize, threshold, fileName))
             p1.start()
             procs.append(p1)
             for p in procs:
                 p.join()
-              
 
         # with codecs.open("./output/{}[{}].json".format(fileName, j), 'w', encoding="utf-8") as file:
         #     file.write(json.dumps(dataTest, indent=4, ensure_ascii=False))
