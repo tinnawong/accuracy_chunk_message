@@ -478,7 +478,7 @@ def logProcess(fileName, pathOutput):
                 pidBegin = True
                 logTime["psutil_cpu_percent"] = psutil.cpu_percent()
                 logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
-                print(psutil.cpu_percent(interval=0.5))
+                print(">>> ",psutil.cpu_percent(interval=0.5))
                 subTimeProcess = {}
                 with p.oneshot():
                     subTimeProcess["ppid"] = time.time()
@@ -505,7 +505,7 @@ def logProcess(fileName, pathOutput):
 def genPathFile(directory, keyFile=None):
     
     if(os.path.isfile(directory) ):
-        print(os.path.splitext(directory)[1])
+        # print(os.path.splitext(directory)[1])
         fileSupport = [".txt"]
         if(os.path.splitext(directory)[1] in fileSupport):
             return [directory]
@@ -533,8 +533,8 @@ if __name__ == "__main__":
     # 2 insertion
     # 3 correction
 
-    rDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/correct test/50kb 3922_310863_หลักการเขียนโปรแกรม (ปี1) test.txt"
-    hDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/raw test/50kb 3922 test.txt"
+    rDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/correct test/10kb 3911_240863 พาณิชย์อิเล็กทรอนิกส์ (ปี 3).txt"
+    hDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/raw test/10kb 3911 test.txt"
     rPath = genPathFile(rDir, "")
     hPath = genPathFile(hDir, "")
 
@@ -560,7 +560,7 @@ if __name__ == "__main__":
 
             procs = []
 
-            p2 = Process(target=logProcess, args=(fileName, "output/7th monitor system/"))
+            p2 = Process(target=logProcess, args=(fileName, "output/"))
             p2.start()
             procs.append(p2)
             time.sleep(10)
