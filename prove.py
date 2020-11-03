@@ -422,9 +422,9 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
         print("\n\nError insertion + substitution + correction != hypothesisLength\n")
 
     if(1):
-        writeHtml(provText, fileName, "output")
+        writeHtml(provText, fileName, "output/7th monitor system/")
 
-    with codecs.open("./output/{}.json".format(fileName), 'w', encoding="utf-8") as file:
+    with codecs.open("./output/7th monitor system/{}.json".format(fileName), 'w', encoding="utf-8") as file:
         file.write(json.dumps(provText, indent=4, ensure_ascii=False))
 
     return provText
@@ -478,21 +478,22 @@ def logProcess(fileName, pathOutput):
                 pidBegin = True
                 logTime["psutil_cpu_percent"] = psutil.cpu_percent()
                 logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
-
+                print(psutil.cpu_percent(interval=0.5))
                 subTimeProcess = {}
                 with p.oneshot():
                     subTimeProcess["ppid"] = time.time()
                     subTimeProcess["ppid"] = p.ppid()
                     subTimeProcess["pid"] = p.pid
                     subTimeProcess["memory_percent"] = p.memory_percent()
+                    subTimeProcess["cpu_percent"] = p.cpu_percent(interval=0.5)/psutil.cpu_count()
                     subTimeProcess["memory_full_info"] = p.memory_full_info(
                     )._asdict()
                     logTime["process"] = subTimeProcess
+                    print(">>> ",subTimeProcess["cpu_percent"])
                     del subTimeProcess
                     # print(">>> ppid :", p.ppid())
                     # print(">>> pid :", p.pid)
                 i += 1
-                time.sleep(1)
             log["monitor"].append(logTime)
         except Exception as e:
             print(e, "in function logProcess")
@@ -532,8 +533,8 @@ if __name__ == "__main__":
     # 2 insertion
     # 3 correction
 
-    rDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/correct test/10kb 3911_240863 พาณิชย์อิเล็กทรอนิกส์ (ปี 3).txt"
-    hDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/raw test/10kb 3911 test.txt"
+    rDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/correct test/50kb 3922_310863_หลักการเขียนโปรแกรม (ปี1) test.txt"
+    hDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/raw test/50kb 3922 test.txt"
     rPath = genPathFile(rDir, "")
     hPath = genPathFile(hDir, "")
 
@@ -559,7 +560,7 @@ if __name__ == "__main__":
 
             procs = []
 
-            p2 = Process(target=logProcess, args=(fileName, "output"))
+            p2 = Process(target=logProcess, args=(fileName, "output/7th monitor system/"))
             p2.start()
             procs.append(p2)
             time.sleep(10)

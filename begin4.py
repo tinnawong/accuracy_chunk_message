@@ -1,6 +1,6 @@
 import codecs,json
 import matplotlib.pyplot as plt
-
+import os
 def plotSystem(monitor):
     yBeforCPU = [x["psutil_cpu_percent"] for x in monitor[:10]]
     xBeforCPU = [x for x in range(10)]
@@ -50,11 +50,11 @@ def plotProcess(monitor):
 
 if __name__ == "__main__":
     from multiprocessing import Process
-    with codecs.open("output/25kb 3889 test_monitor.json",'r',encoding="utf-8") as file:
+    with codecs.open("output/60kb test_monitor.json",'r',encoding="utf-8") as file:
         data = file.read()
         jsonData = json.loads(data)
     monitor = jsonData["monitor"]
-
+    print(">>> ",os.getpid())
     procs = []
     p2 = Process(target=plotProcess, args=(monitor,))
     p2.start()
