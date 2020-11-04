@@ -440,9 +440,8 @@ def normalizeText(text):
 
 def logProcess(fileName, pathOutput):
     log = {}
-    i = 0
-    # print("ram :", dict(psutil.virtual_memory()._asdict()))
-    # print("swap memory :", psutil.swap_memory()._asdict())
+    intervalCheck = 1
+    pidBegin = False
 
     log["platformTest"] = platform.platform()
     log["architecture"] = platform.architecture()
@@ -450,50 +449,43 @@ def logProcess(fileName, pathOutput):
     log["psutil_swap_memory"] = psutil.swap_memory()._asdict()
     log["monitor"] = []
 
-    pidBegin = False
+    
     while(1):
         try:
             if(not pidBegin):
                 with codecs.open("output\pid.txt", 'r', encoding="utf-8") as f:
                     pid = int(f.read().strip())
             logTime = {}
-
+            logTime["timestamp"] = time.time()
             if(pid not in psutil.pids()):
                 if(pidBegin):
                     for i in range(10):
                         print(">>> log CPU and RAM")
-                        logTime["psutil_cpu_percent"] = psutil.cpu_percent()
-                        logTime["psutil_virtual_memory"] = psutil.virtual_memory(
-                        )._asdict()
+                        logTime["psutil_cpu_percent"] = psutil.cpu_percent(interval=intervalCheck)
+                        logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
                         log["monitor"].append(logTime)
-                        time.sleep(1)
                     break
-                print(">>> log CPU and RAM")
-                logTime["psutil_cpu_percent"] = psutil.cpu_percent()
+                print(">>> log CPU and RAM befor start process")
+                logTime["psutil_cpu_percent"] = psutil.cpu_percent(interval=intervalCheck)
                 logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
-                time.sleep(1)
             else:
-                print(">>> log cpu work and ram work")
+                # print(">>> log cpu work and ram work")
                 p = psutil.Process(pid)
                 pidBegin = True
                 logTime["psutil_cpu_percent"] = psutil.cpu_percent()
                 logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
-                print(">>> ",psutil.cpu_percent(interval=0.5))
+                # print(">>> ",psutil.cpu_percent(interval=0.5))
                 subTimeProcess = {}
                 with p.oneshot():
                     subTimeProcess["ppid"] = time.time()
                     subTimeProcess["ppid"] = p.ppid()
                     subTimeProcess["pid"] = p.pid
                     subTimeProcess["memory_percent"] = p.memory_percent()
-                    subTimeProcess["cpu_percent"] = p.cpu_percent(interval=0.5)/psutil.cpu_count()
-                    subTimeProcess["memory_full_info"] = p.memory_full_info(
-                    )._asdict()
+                    subTimeProcess["cpu_percent"] = p.cpu_percent(interval=intervalCheck)/psutil.cpu_count()
+                    subTimeProcess["memory_full_info"] = p.memory_full_info()._asdict()
                     logTime["process"] = subTimeProcess
-                    print(">>> ",subTimeProcess["cpu_percent"])
+                    print(">>> ",logTime["psutil_cpu_percent"],"/",subTimeProcess["cpu_percent"])
                     del subTimeProcess
-                    # print(">>> ppid :", p.ppid())
-                    # print(">>> pid :", p.pid)
-                i += 1
             log["monitor"].append(logTime)
         except Exception as e:
             print(e, "in function logProcess")
@@ -533,10 +525,10 @@ if __name__ == "__main__":
     # 2 insertion
     # 3 correction
 
-    rDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/correct test/10kb 3911_240863 พาณิชย์อิเล็กทรอนิกส์ (ปี 3).txt"
-    hDir = "T:\Shared drives\งานบริษัท\เทียบเฉลย accuracy\สำหรับทดสอบ/raw test/10kb 3911 test.txt"
-    rPath = genPathFile(rDir, "")
-    hPath = genPathFile(hDir, "")
+    rDir = "T:\Shared drives\งานบริษัท/เทียบเฉลย accuracy\ไฟล์ทดสอบเพิ่มเติม/correct/"
+    hDir = "T:\Shared drives\งานบริษัท/เทียบเฉลย accuracy\ไฟล์ทดสอบเพิ่มเติม/raw/"
+    rPath = genPathFile(rDir, "3391")
+    hPath = genPathFile(hDir, "3391")
 
     threshold = 100
     # size = range(2000,3000)
