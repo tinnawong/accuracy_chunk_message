@@ -1,7 +1,7 @@
 
 
 if __name__ == "__main__":
-    # for check opertor between prove version and current version
+    # for compare opertor between prove version(python) and current version(golang)
     from prove import testRun,writeHtml,genPathFile
     import os
     import psutil
