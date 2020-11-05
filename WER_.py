@@ -1,14 +1,8 @@
 """
-
-@author Kiettiphong Manovisut
-
-References:
-https://en.wikipedia.org/wiki/Word_error_rate
-https://www.github.com/mission-peace/interview/wiki
+Fix bug unequal length
 
 """
 import numpy
-
 
 def writeHtml(resultDict):
     html = """
