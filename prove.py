@@ -10,6 +10,7 @@ from multiprocessing import Process
 import platform
 import git
 # reference(r) to the hypothesis(h)
+# for prove accuracy each chunk size
 
 
 def generateMatrix(r, h):
@@ -484,7 +485,7 @@ def logProcess(fileName, pathOutput):
                     subTimeProcess["cpu_percent"] = p.cpu_percent(interval=intervalCheck)/psutil.cpu_count()
                     subTimeProcess["memory_full_info"] = p.memory_full_info()._asdict()
                     logTime["process"] = subTimeProcess
-                    print(">>> ",logTime["psutil_cpu_percent"],"/",subTimeProcess["cpu_percent"])
+                    # print(">>> ",logTime["psutil_cpu_percent"],"/",subTimeProcess["cpu_percent"])
                     del subTimeProcess
             log["monitor"].append(logTime)
         except Exception as e:
