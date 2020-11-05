@@ -1,19 +1,27 @@
-# from guppy import hpy
-# import psutil,time,sys
-# import psutil,os
-# import platform,codecs
-# from prove import generateMatrix
-# print(platform.node())
-
-# print(platform.machine())
-# print(platform.node())
-# print(platform.architecture())
-from unicategories import unicodedata
-def isMn(aChar):
-    cc = u'{}'.format(aChar)
-    print(unicodedata.category(cc))
+from multiprocessing import Process
+import os,time,codecs
+import multiprocessing
 
 
+def f1(name):
+    with codecs.open("output\pid.txt",'w',encoding="utf-8") as f:
+        f.write(str(os.getpid()))
+    print('hello1', name)
 
-if __name__ == "__main__":
-    isMn('')
+def f2(name):
+    # time.sleep(0.1)
+    with codecs.open("output\pid.txt",'r',encoding="utf-8") as f:
+        pid = f.read()
+    print('hello2', name,pid,os.getpid())
+
+
+if __name__ == '__main__':
+    procs = []
+    p1 = Process(target=f1, args=('bob',))
+    p1.start()
+    procs.append(p1)
+    p2 = Process(target=f2, args=('jerry',))    
+    p2.start()
+    procs.append(p2)
+    for p in procs:
+         p.join()
