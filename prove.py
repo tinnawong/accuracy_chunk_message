@@ -188,8 +188,7 @@ def findLastIndex2(r, h, dimensions, threshold, textFinal):
     textTag.reverse()
     if((lastIndex[0] < threshold or lastIndex[1] < threshold) and not textFinal):
         lastIndex = [0, 0]
-    dataReturn = {"abstract": (substitution, deletion, insertion,
-                               correction), "textTag": textTag, "lastIndex": lastIndex}
+    dataReturn = {"abstract": (substitution, deletion, insertion,correction), "textTag": textTag, "lastIndex": lastIndex}
     return dataReturn
 
 
@@ -393,7 +392,7 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
     provText = {
         "pathFileNameRef": rPath,
         "pathFileNameHyp": hPath,
-        "memoryOverload": resultDict["memoryOverload"],
+        
         "start": startTime,
         "endTime": endTime,
         "duration": endTime-startTime,
@@ -406,15 +405,10 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
         "correction": resultDict["correction"],
         "characterErrorRate": resultDict["WER"],
         "accuracy": 100 - resultDict["WER"],
+        "memoryOverload": resultDict["memoryOverload"],
         "maxLength": maxLength,
         "threshold": threshold,
         "chunkSize": chunkSize,
-        # "processor": {"platform":"",
-        #               "RAM":"",
-        #               "":"",
-        #               "":"",
-        #               "":"",
-        #               "":""},
         "commitCode": sha
     }
     if(provText["deletion"]+provText["substitution"]+provText["correction"] != provText["referenceLength"]):
@@ -423,9 +417,9 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
         print("\n\nError insertion + substitution + correction != hypothesisLength\n")
 
     if(1):
-        writeHtml(provText, fileName, "output/7th monitor system/")
+        writeHtml(provText, fileName, "output/9th partii_grpc normolize/")
 
-    with codecs.open("./output/7th monitor system/{}.json".format(fileName), 'w', encoding="utf-8") as file:
+    with codecs.open("./output/9th partii_grpc normolize/{}.json".format(fileName), 'w', encoding="utf-8") as file:
         file.write(json.dumps(provText, indent=4, ensure_ascii=False))
 
     return provText
@@ -526,8 +520,8 @@ if __name__ == "__main__":
     # 2 insertion
     # 3 correction
 
-    rDir = "T:\Shared drives\งานบริษัท/เทียบเฉลย accuracy\ไฟล์ทดสอบเพิ่มเติม/correct/"
-    hDir = "T:\Shared drives\งานบริษัท/เทียบเฉลย accuracy\ไฟล์ทดสอบเพิ่มเติม/raw/"
+    rDir = "T:\Shared drives\งานบริษัท/เทียบเฉลย accuracy/ส่งให้ partii/correct/NEWS_พยากรณ์อากาศ.txt"
+    hDir = "T:\Shared drives\งานบริษัท/ผลจาก partii_grpc/1st time normolize number/NEWS_พยากรณ์อากาศ_transcript.txt"
     rPath = genPathFile(rDir, "3391")
     hPath = genPathFile(hDir, "3391")
 
@@ -553,7 +547,7 @@ if __name__ == "__main__":
 
             procs = []
 
-            p2 = Process(target=logProcess, args=(fileName, "output/"))
+            p2 = Process(target=logProcess, args=(fileName, "output/9th partii_grpc normolize/"))
             p2.start()
             procs.append(p2)
             time.sleep(10)
