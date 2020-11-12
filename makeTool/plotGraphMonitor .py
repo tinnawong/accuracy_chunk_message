@@ -53,19 +53,24 @@ def plotProcess(monitor):
     yCPUUsage = []
     checkPoint = False
     xUsage =[]
-    timeBefor = 0
+    timeBefor = -1
+    count = 0
+    avgTime = 0
     for i,logProcess in enumerate(monitor):
         if("process" in logProcess):
             if(not checkPoint):
                 startTime = i
                 checkPoint = True
+
             # print(logProcess["process"]["cpu_percent"])
-            # if(timeBefor == 0):
-            #     print(0)
-            #     timeBefor = logProcess["timestamp"]
-            # else:
-            #     print(logProcess["timestamp"]-timeBefor)
-            #     timeBefor = logProcess["timestamp"]
+            count += 1
+            if(timeBefor == -1):
+                firsTime = logProcess["timestamp"]
+                timeBefor = logProcess["timestamp"]
+            else:
+                # print(logProcess["timestamp"]-timeBefor)
+                timeBefor = logProcess["timestamp"]
+            
 
             yMemoryUsage.append(logProcess["process"]["memory_percent"])
             yCPUUsage.append(logProcess["process"]["cpu_percent"])
@@ -74,11 +79,16 @@ def plotProcess(monitor):
     if(len(xUsage) == len(yCPUUsage) and len(xUsage) == len(yMemoryUsage)):
         text = ""
         for i,value in enumerate(xUsage):
-            print(value,"\t",yCPUUsage[i],"\t",yMemoryUsage[i])
+            # print(value,"\t",yCPUUsage[i],"\t",yMemoryUsage[i])
             text += str(yCPUUsage[i])+"\t"+str(yMemoryUsage[i])+"\n"
         clipboard.copy(text)
-
-    plt.xlabel('time(s)')   #แกน x พร้อมตั้งชื่อในวงเล็บ
+    avgTime = (timeBefor-firsTime)/count
+    duration = timeBefor-firsTime
+    # text2 = ">>> duration :"+str(duration)+"\n>>> avg :"+str(avgTime)
+    # clipboard.copy(text2)
+    print(">>> duration :",duration)
+    print(">>> avg :",avgTime)
+    plt.xlabel('time(≈ %.4f s)\n duration : %.2f s'%(avgTime,duration) )  #แกน x พร้อมตั้งชื่อในวงเล็บ
     plt.ylabel('percent(%)')   #แกน y พร้อมตั้งชื่อในวงเล็บ
     plt.plot(xUsage,yCPUUsage) # คำสั่งวาดกราฟ
     plt.plot(xUsage,yMemoryUsage) # คำสั่งวาดกราฟ
@@ -91,7 +101,7 @@ def plotProcess(monitor):
 
 if __name__ == "__main__":
     from multiprocessing import Process
-    with codecs.open("output/test_monitor.json",'r',encoding="utf-8") as file:
+    with codecs.open('../output/7th monitor system/golang prove/3391_monitor.json','r',encoding="utf-8") as file:
         data = file.read()
         jsonData = json.loads(data)
     monitor = jsonData["monitor"]
