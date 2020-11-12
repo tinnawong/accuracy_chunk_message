@@ -435,7 +435,7 @@ def normalizeText(text):
 
 def logProcess(fileName, pathOutput):
     log = {}
-    intervalCheck = 1
+    intervalCheck = 0.0100
     pidBegin = False
 
     log["platformTest"] = platform.platform()
@@ -455,12 +455,12 @@ def logProcess(fileName, pathOutput):
             if(pid not in psutil.pids()):
                 if(pidBegin):
                     for i in range(10):
-                        print(">>> log CPU and RAM")
+                        # print(">>> log after start process")
                         logTime["psutil_cpu_percent"] = psutil.cpu_percent(interval=intervalCheck)
                         logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
                         log["monitor"].append(logTime)
                     break
-                print(">>> log CPU and RAM befor start process")
+                # print(">>> log befor start process")
                 logTime["psutil_cpu_percent"] = psutil.cpu_percent(interval=intervalCheck)
                 logTime["psutil_virtual_memory"] = psutil.virtual_memory()._asdict()
             else:
