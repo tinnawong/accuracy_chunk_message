@@ -9,13 +9,13 @@ def runGo():
 
 if __name__ == "__main__":
     # for monitor cpu and ram of accuracy golang process
-    fileName = "test"
+    fileName = "60kb 3913"
     print(os.getpid())
     procs = []
-    p2 = Process(target=logProcess, args=(fileName, "output"))
+    p2 = Process(target=logProcess, args=(fileName, "output/7th monitor system\golang prove"))
     p2.start()
     procs.append(p2)
-    time.sleep(10)
+    time.sleep(2)
     p1 = Process(target=runGo, args=())
     p1.start()
     procs.append(p1)
