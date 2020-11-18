@@ -302,7 +302,7 @@ def writeHtml(provText, fileName, pathOutput):
     </html>
     """
     for i in range(1, 501, 1):
-        if(not os.path.isfile("output/{}[{}].html".format(fileName, i))):
+        if(not os.path.isfile("{}/{}[{}].html".format(pathOutput,fileName, i))):
             break
     with codecs.open(os.path.join(pathOutput, "{}[{}].html".format(fileName, i)), 'w', encoding="utf-8") as file:
         file.write(html)
@@ -417,9 +417,9 @@ def testRun(r, h, rPath, hPath, chunkSize, threshold, fileName, createHtml=True)
         print("\n\nError insertion + substitution + correction != hypothesisLength\n")
 
     if(1):
-        writeHtml(provText, fileName, "output/9th partii_grpc normolize/")
+        writeHtml(provText, fileName, "output/10 th go vs go(chunk)")
 
-    with codecs.open("./output/9th partii_grpc normolize/{}.json".format(fileName), 'w', encoding="utf-8") as file:
+    with codecs.open("./output/10 th go vs  python vs go(chunk)/python/{}.json".format(fileName), 'w', encoding="utf-8") as file:
         file.write(json.dumps(provText, indent=4, ensure_ascii=False))
 
     return provText
@@ -435,7 +435,7 @@ def normalizeText(text):
 
 def logProcess(fileName, pathOutput):
     log = {}
-    intervalCheck = 0.0100
+    intervalCheck = 1
     pidBegin = False
 
     log["platformTest"] = platform.platform()
@@ -501,6 +501,7 @@ def genPathFile(directory, keyFile=None):
             return []
     else:
         files = os.listdir(directory)
+        files.sort()
         allPath = []
         for fileName in files:
             newPath = os.path.join(directory, fileName)
@@ -520,10 +521,10 @@ if __name__ == "__main__":
     # 2 insertion
     # 3 correction
 
-    rDir = "T:\Shared drives\งานบริษัท/เทียบเฉลย accuracy/ส่งให้ partii/correct/NEWS_พยากรณ์อากาศ.txt"
-    hDir = "T:\Shared drives\งานบริษัท/ผลจาก partii_grpc/1st time normolize number/NEWS_พยากรณ์อากาศ_transcript.txt"
-    rPath = genPathFile(rDir, "3391")
-    hPath = genPathFile(hDir, "3391")
+    rDir = "T:\Shared drives\งานบริษัท/เทียบเฉลย accuracy/ไฟล์ทดสอบเพิ่มเติม/correct/3391_approved.txt"
+    hDir = "T:\Shared drives\งานบริษัท/เทียบเฉลย accuracy/ไฟล์ทดสอบเพิ่มเติม/raw/3391.txt"
+    rPath = genPathFile(rDir, "")
+    hPath = genPathFile(hDir, "")
 
     threshold = 100
     # size = range(2000,3000)
@@ -547,7 +548,7 @@ if __name__ == "__main__":
 
             procs = []
 
-            p2 = Process(target=logProcess, args=(fileName, "output/9th partii_grpc normolize/"))
+            p2 = Process(target=logProcess, args=(fileName, "output/10 th go vs  python vs go(chunk)/"))
             p2.start()
             procs.append(p2)
             time.sleep(10)
