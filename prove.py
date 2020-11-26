@@ -435,7 +435,7 @@ def normalizeText(text):
 
 def logProcess(fileName, pathOutput):
     log = {}
-    intervalCheck = 1
+    intervalCheck = 0.0001
     pidBegin = False
 
     log["platformTest"] = platform.platform()
