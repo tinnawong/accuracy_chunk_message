@@ -107,6 +107,7 @@ def plotProcess2(monitor):
     timeBefor = -1
     count = 0
     avgTime = 0
+    buffRamUse = []
     for i,logProcess in enumerate(monitor):
         if("process" in logProcess):
             if(not checkPoint):
@@ -122,7 +123,7 @@ def plotProcess2(monitor):
                 # print(logProcess["timestamp"]-timeBefor)
                 timeBefor = logProcess["timestamp"]
             
-
+            buffRamUse.append(logProcess["process"]["memory_full_info"]["rss"])
             yMemoryUsage.append(logProcess["process"]["memory_full_info"]["rss"])
             yCPUUsage.append(logProcess["process"]["cpu_percent"])
             xUsage.append(i)
@@ -132,11 +133,9 @@ def plotProcess2(monitor):
         for i,value in enumerate(xUsage):
             # print(value,"\t",yCPUUsage[i],"\t",yMemoryUsage[i])
             text += str(yCPUUsage[i])+"\t"+str(yMemoryUsage[i])+"\n"
-        clipboard.copy(text)
+    clipboard.copy(str(max(buffRamUse)))
     avgTime = (timeBefor-firsTime)/count
     duration = timeBefor-firsTime
-    # text2 = ">>> duration :"+str(duration)+"\n>>> avg :"+str(avgTime)
-    # clipboard.copy(text2)
     print(">>> duration :",duration)
     print(">>> avg :",avgTime)
     plt.xlabel('time(≈ %.4f s)\n duration : %.2f s'%(avgTime,duration) )  #แกน x พร้อมตั้งชื่อในวงเล็บ
