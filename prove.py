@@ -433,7 +433,7 @@ def normalizeText(text):
     return text
 
 
-def logProcess(fileName, pathOutput):
+def logProcess(fileName, pathOutput,threshold):
     log = {}
     intervalCheck = 0.0001
     pidBegin = False
@@ -484,7 +484,7 @@ def logProcess(fileName, pathOutput):
             log["monitor"].append(logTime)
         except Exception as e:
             print(e, "in function logProcess")
-    with codecs.open(os.path.join(pathOutput, "{}_monitor.json".format(fileName)), "w", encoding="utf-8") as f:
+    with codecs.open(os.path.join(pathOutput, "{} th[{}]_monitor.json".format(fileName,threshold)), "w", encoding="utf-8") as f:
         f.write(json.dumps(log, indent=4, ensure_ascii=False))
     return log
 
