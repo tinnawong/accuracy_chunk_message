@@ -150,7 +150,7 @@ def plotProcess2(monitor):
     plt.show()
 if __name__ == "__main__":
     from multiprocessing import Process
-    with codecs.open('../output/7th monitor system/golang prove/3391_monitor.json','r',encoding="utf-8") as file:
+    with codecs.open('../output/3517_raw_monitor.json','r',encoding="utf-8") as file:
         data = file.read()
         jsonData = json.loads(data)
     monitor = jsonData["monitor"]
