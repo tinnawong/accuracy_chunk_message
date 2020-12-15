@@ -9,12 +9,14 @@ def normalizeText(text):
 
 if __name__ == "__main__":
     import codecs
-    pathFile = "T:/Shared drives/งานบริษัท/เทียบเฉลย accuracy/ไฟล์ทดสอบเพิ่มเติม/correct/3391_approved - norm.txt"
-    with codecs.open(pathFile,'r',encoding="utf-8") as f:
-        data = f.read()
-    data = normalizeText(data)
-    with codecs.open(pathFile,'w',encoding="utf-8") as f:
-        f.write(data)
+    from coppyMaxRam import genPathFile
+    pathFile = "T:/Shared drives/งานบริษัท/เทียบเฉลย accuracy/ไฟล์ทดสอบเพื่อใช้ในการตั้งค่า/raw/"
     
+    for ff in genPathFile(pathFile):
+            with codecs.open(ff,'r',encoding="utf-8-sig") as f:
+                data = f.read()
+            data = normalizeText(data)
+            with codecs.open(ff,'w',encoding="utf-8") as f:
+                f.write(data)
     # for i in range(5000,30001,5000):
     #     print(i)
