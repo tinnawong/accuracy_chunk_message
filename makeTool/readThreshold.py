@@ -33,7 +33,7 @@ def readThreshold(path):
     # for f in listFileCheck:
     #     if(not f[2]):
     #         print(f)
-    return listFileCheck
+    return listFileCheck,accuracy
 
 
 def runTest(pathTask):
@@ -55,7 +55,7 @@ def runTest(pathTask):
             for p in os.listdir(pathTask):
                 pathFile = os.path.join(pathTask, p)
                 print(pathFile)
-                data = readThreshold(pathFile)
+                data,acc = readThreshold(pathFile)
                 buffCheck = []
                 for i,n in enumerate(range(2,101,2)):
                     try:
@@ -70,12 +70,12 @@ def runTest(pathTask):
                 buffData.extend(data)
                 buffData.extend([["","","",""]])
             df1 = pd.DataFrame(dataOFFile, columns= fileName)
-            df1.to_csv("./output_1.csv",index=False)
+            df1.to_csv("./outputReadThreshold_1.csv",index=False)
             df2 = pd.DataFrame(np.array(buffData),columns=['file name', 'accuracy', 'threshold','pass'])
-            df2.to_csv("./output_2.csv",index=False)
+            df2.to_csv("./outputReadThreshold_2.csv",index=False)
             
 
 if __name__ == "__main__":
-    pathTask = "G:/ผลการทดลอง/13th การทดลองthreshold/"
+    pathTask = "F:/ผลการทดลอง/13th การทดลองthreshold/"
     runTest(pathTask)
 
