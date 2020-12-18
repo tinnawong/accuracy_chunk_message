@@ -1,0 +1,10 @@
+*.html
+*.csv
+vendor/
+test.py
+wer.py
+__pycache__/
+*.csv
+output/
+.vscode
+file text/
