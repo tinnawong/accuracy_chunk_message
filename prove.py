@@ -515,7 +515,7 @@ def genPathFile(directory, keyFile=None):
 
 
 if __name__ == "__main__":
-
+    # for start prove concept chunk message
     # 0 substitution
     # 1 deletion
     # 2 insertion
