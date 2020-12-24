@@ -5,6 +5,7 @@ import json
 import os
 import numpy as np
 import pandas as pd
+
 def getAccuracy(pathFile, flag=False):
     with codecs.open(pathFile, 'r', encoding="utf-8") as f:
         data = f.read()
@@ -21,6 +22,7 @@ def readThreshold(path):
     listFileCheck = []
     fileStart = genPathFile(path, "th[80]_result.json")[0]
     accuracy = getAccuracy(fileStart)[1]
+    print("accracy :",accuracy)
     for pathFile in genPathFile(path, "result.json"):
         data = getAccuracy(pathFile)
         if(data[1] == accuracy):
@@ -52,10 +54,12 @@ def runTest(pathTask):
             dataOFFile = {}
             fileName =["threshold"]
             dataOFFile[fileName[0]] = range(2,101,2)
+            textCoppy = ''
             for p in os.listdir(pathTask):
                 pathFile = os.path.join(pathTask, p)
                 print(pathFile)
                 data,acc = readThreshold(pathFile)
+                textCoppy += str(acc)+"\t"
                 buffCheck = []
                 for i,n in enumerate(range(2,101,2)):
                     try:
@@ -69,6 +73,8 @@ def runTest(pathTask):
                 buffData.extend([[p,"","",""]])
                 buffData.extend(data)
                 buffData.extend([["","","",""]])
+            import clipboard
+            clipboard.copy(textCoppy)
             df1 = pd.DataFrame(dataOFFile, columns= fileName)
             df1.to_csv("./outputReadThreshold_1.csv",index=False)
             df2 = pd.DataFrame(np.array(buffData),columns=['file name', 'accuracy', 'threshold','pass'])
@@ -76,6 +82,6 @@ def runTest(pathTask):
             
 
 if __name__ == "__main__":
-    pathTask = "F:/ผลการทดลอง/13th การทดลองthreshold/"
+    pathTask = "G:/ผลการทดลอง/13th การทดลองthreshold/"
     runTest(pathTask)
 
