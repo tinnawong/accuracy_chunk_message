@@ -77,17 +77,17 @@ def runTest2(pathTask):
                         #       data[i][j]["processStatus"], " ", data[i][j]["processMessage"])
                         buffCheck.append(data[i][j]["processStatus"])
                         if(data[i][j]["processStatus"] == "success" and firstCheck):
-                            data[i][j]["accuracyCheck"] = True
+                            data[i][j]["accuracyCheck"] = "True, "+"{:.2f}".format(data[i][j]["accuracy"])
                             accuracy = data[i][j]["accuracy"]
                             listAcc.append(data[i][j]["accuracy"])
                             print(">>> ",accuracy)
                             firstCheck = False
                         elif data[i][j]["processStatus"] == "success" and data[i][j]["processMessage"] == "":
-                            data[i][j]["accuracyCheck"] = True
+                            data[i][j]["accuracyCheck"] = "True, "+"{:.2f}".format(data[i][j]["accuracy"])
                             if(accuracy != data[i][j]["accuracyCheck"] ):
                                 listAcc.append(data[i][j]["accuracy"])
                         else:
-                            data[i][j]["accuracyCheck"] = False
+                            data[i][j]["accuracyCheck"] = "Flase, "+"{:.2f}".format(data[i][j]["accuracy"])
 
                         # if(data[i][j]["processStatus"] == "success" and data[i][j]["processMessage"] == "" and accuracy != data[i][j]["accuracy"]):
                         #     print(">>> warring accuracy :", accuracy)
@@ -118,5 +118,5 @@ def runTest2(pathTask):
 
 
 if __name__ == "__main__":
-    pathTask = "G:/ผลการทดลอง/13-1 th การทดลองthreshold"
+    pathTask = "F:/ผลการทดลอง/13-1 th การทดลองthreshold"
     runTest2(pathTask)
