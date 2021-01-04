@@ -5,6 +5,7 @@ test.py
 wer.py
 __pycache__/
 *.csv
+*.txt
 output/
 .vscode
 file text/
